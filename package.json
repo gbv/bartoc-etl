@@ -1,0 +1,33 @@
+{
+  "name": "bartoc-etl",
+  "version": "1.0.0",
+  "description": "Prototype ETL pipeline for indexing Bartoc data from MongoDB into Solr.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "ts-node src/main.ts",
+    "build": "vite build",
+    "lint": "eslint . --ext .ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "vite": "^6.2.5"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.24.0",
+    "@types/node": "^22.14.0",
+    "@typescript-eslint/eslint-plugin": "^8.29.1",
+    "@typescript-eslint/parser": "^8.29.1",
+    "eslint": "^9.24.0",
+    "eslint-config-gbv": "^2.6.0",
+    "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-prettier": "^5.2.6",
+    "globals": "^16.0.0",
+    "prettier": "3.5.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.29.1"
+  }
+}

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<schema name="bartoc" version="1.6">
+  <!-- ================================================
+       Field Type Definitions
+       ================================================ -->
+  <types>
+    <!-- A non-tokenized string: used for IDs and keywords -->
+    <fieldType name="string" class="solr.StrField" sortMissingLast="true" />
+
+    <!-- Text field type for English: uses a standard tokenizer and basic filters -->
+    <fieldType name="text_en" class="solr.TextField" positionIncrementGap="100">
+      <analyzer type="index">
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+        <filter class="solr.EnglishPossessiveFilterFactory"/>
+        <filter class="solr.KeywordMarkerFilterFactory" protected="protwords.txt"/>
+        <filter class="solr.EnglishMinimalStemFilterFactory"/>
+      </analyzer>
+      <analyzer type="query">
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+      </analyzer>
+    </fieldType>
+
+    <!-- Date type: based on ISO 8601 -->
+    <fieldType name="pdate" class="solr.TrieDateField" precisionStep="0" positionIncrementGap="0"/>
+
+    <!-- Integer type -->
+    <fieldType name="pint" class="solr.TrieIntField" precisionStep="0" positionIncrementGap="0"/>
+  </types>
+
+  <!-- ================================================
+       Field Definitions
+       ================================================ -->
+  <fields>
+    <!-- Unique Identifier -->
+    <field name="id" type="string" indexed="true" stored="true" required="true"/>
+
+    <!-- Title field for English; used for full-text search -->
+    <field name="title_en" type="text_en" indexed="true" stored="true"/>
+
+    <!-- Description field for English; stores the first definition -->
+    <field name="description_en" type="text_en" indexed="true" stored="true"/>
+
+    <!-- Multivalued language field -->
+    <field name="languages_ss" type="string" indexed="true" stored="true" multiValued="true"/>
+
+    <!-- Multivalued publisher names -->
+    <field name="publisher_ss" type="string" indexed="true" stored="true" multiValued="true"/>
+
+    <!-- Multivalued alternative labels -->
+    <field name="alt_labels_ss" type="string" indexed="true" stored="true" multiValued="true"/>
+
+    <!-- Multivalued Dewey Decimal Classifications -->
+    <field name="ddc_ss" type="string" indexed="true" stored="true" multiValued="true"/>
+
+    <!-- Date fields -->
+    <field name="created_dt" type="pdate" indexed="true" stored="true"/>
+    <field name="modified_dt" type="pdate" indexed="true" stored="true"/>
+
+    <!-- Start Year as integer -->
+    <field name="start_year_i" type="pint" indexed="true" stored="true"/>
+
+    <!-- URL field -->
+    <field name="url_s" type="string" indexed="false" stored="true"/>
+
+    <!-- Multivalued type field -->
+    <field name="type_ss" type="string" indexed="true" stored="true" multiValued="true"/>
+  </fields>
+
+  <!-- ================================================
+       Dynamic Field Definitions
+       ================================================ -->
+  <dynamicField name="*_txt" type="text_en" indexed="true" stored="true"/>
+  <dynamicField name="*_s" type="string" indexed="true" stored="true"/>
+  <dynamicField name="*_i" type="pint" indexed="true" stored="true"/>
+  <dynamicField name="*_dt" type="pdate" indexed="true" stored="true"/>
+
+  <!-- ================================================
+       Copy Field Definitions
+       ================================================ -->
+  <!-- Create a catch-all searchable field -->
+  <field name="text" type="text_en" indexed="true" stored="false" multiValued="true"/>
+
+  <!-- Copy title and description into the catch-all field -->
+  <copyField source="title_en" dest="text" />
+  <copyField source="description_en" dest="text" />
+
+  <!-- ================================================
+       Schema Configuration
+       ================================================ -->
+  <uniqueKey>id</uniqueKey>
+  <defaultSearchField>text</defaultSearchField>
+  <solrQueryParser defaultOperator="OR"/>
+</schema>
