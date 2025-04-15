@@ -6,6 +6,7 @@
   <types>
     <!-- A non-tokenized string: used for IDs and keywords -->
     <fieldType name="string" class="solr.StrField" sortMissingLast="true" />
+    <fieldType name="long" class="solr.LongPointField" positionIncrementGap="0"/>
 
     <!-- Text field type for English: uses a standard tokenizer and basic filters -->
     <fieldType name="text_en" class="solr.TextField" positionIncrementGap="100">
@@ -33,6 +34,9 @@
        Field Definitions
        ================================================ -->
   <fields>
+    <!-- SolrCloud-->
+    <field name="_version_" type="long" indexed="true" stored="true" multiValued="false"/>
+
     <!-- Unique Identifier -->
     <field name="id" type="string" indexed="true" stored="true" required="true"/>
 
@@ -90,6 +94,4 @@
        Schema Configuration
        ================================================ -->
   <uniqueKey>id</uniqueKey>
-  <defaultSearchField>text</defaultSearchField>
-  <solrQueryParser defaultOperator="OR"/>
 </schema>

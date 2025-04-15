@@ -1,33 +1,54 @@
 {
-  "name": "bartoc-etl",
+  "name": "bartoc-etl-express",
   "version": "1.0.0",
-  "description": "Prototype ETL pipeline for indexing Bartoc data from MongoDB into Solr.",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node src/main.ts",
-    "build": "vite build",
-    "lint": "eslint . --ext .ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon --config nodemon.json",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "lint": "eslint",
+    "live:seed": "npx ts-node ./src/data/seedTerminologies.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "dependencies": {
-    "vite": "^6.2.5"
-  },
+  "description": "",
   "devDependencies": {
     "@eslint/js": "^9.24.0",
+    "@faker-js/faker": "^9.7.0",
+    "@tsconfig/node20": "^20.1.5",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/jest": "^29.5.14",
+    "@types/lodash": "^4.17.16",
+    "@types/morgan": "^1.9.9",
     "@types/node": "^22.14.0",
-    "@typescript-eslint/eslint-plugin": "^8.29.1",
-    "@typescript-eslint/parser": "^8.29.1",
+    "axios": "^1.8.4",
+    "dotenv": "^16.4.7",
     "eslint": "^9.24.0",
-    "eslint-config-gbv": "^2.6.0",
-    "eslint-config-prettier": "^10.1.1",
+    "eslint-config-prettier": "^10.1.2",
+    "eslint-plugin-jest": "^28.11.0",
     "eslint-plugin-prettier": "^5.2.6",
     "globals": "^16.0.0",
-    "prettier": "3.5.3",
+    "jest": "^29.7.0",
+    "lodash": "^4.17.21",
+    "mongodb": "^6.15.0",
+    "mongoose": "^8.13.2",
+    "nodemon": "^3.1.9",
+    "portfinder": "^1.0.35",
+    "prettier": "^3.5.3",
+    "ts-jest": "^29.3.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.29.1"
+    "typescript-eslint": "^8.29.1",
+    "zod": "^3.24.2"
+  },
+  "overrides": {
+    "eslint": "^9.24.0"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "morgan": "^1.10.0"
   }
 }

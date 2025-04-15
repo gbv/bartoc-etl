@@ -71,7 +71,7 @@ solr-configs/
 
 2. Mount it to a known location inside the container. If the default isn’t available, you can choose another path (for instance, /configsets/your-configset):
 ```bash
-docker run -d -p 8983:8983 --name solr-custom \ -v $(pwd)/solr-configs/your-configset:/configsets/your-configset \ solr:8
+docker run -d -p 8983:8983 --name solr-custom -v $(pwd)/solr-configs/your-configset:/configsets/your-configset solr:8
 ```
 
 3. When creating the collection, tell Solr which config set to use. If you mounted it to /configsets/your-configset, create your collection with:

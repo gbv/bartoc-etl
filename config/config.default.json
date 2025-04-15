@@ -1,0 +1,26 @@
+{
+  "baseUrl": null,
+  "closedWorldAssumption": true,
+  "mongo": {
+    "user": "",
+    "pass": "",
+    "host": "127.0.0.1",
+    "port": 27017,
+    "db": "jskos-server",
+    "options": {
+      "connectTimeoutMS": 360000,
+      "socketTimeoutMS": 360000,
+      "heartbeatFrequencyMS": 10000
+    }
+  },
+  "solr": {
+    "host": "127.0.0.1",
+    "port": 8983,
+    "version": 8.1
+  },
+  "port": 3000,
+  "proxies": [],
+  "title": "ETL for Bartoc",
+  "verbosity": "log",
+  "version": null
+}

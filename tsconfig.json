@@ -1,18 +1,16 @@
 {
-    "include": [
-      "./src/**/*"
-    ],
-    "exclude": [
-      "./dist/**/*"
-    ],
-    "compilerOptions": {
-      "baseUrl": ".",
-      "paths": {
-        "@/*": [
-          "src/*"
-        ]
-      },
-      "outDir": "./dist",
-      "allowJs": true
-    }
+  "extends": "@tsconfig/node20/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "forceConsistentCasingInFileNames": true,
+    "typeRoots": ["src/types", "./node_modules/@types"],
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "module": "CommonJS",
+    "target": "ES2020",
+    "moduleResolution": "node",
+  },
+  "include": ["src/**/*", "src/types/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
