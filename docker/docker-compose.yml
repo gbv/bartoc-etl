@@ -1,0 +1,43 @@
+services:
+  etl:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: bartoc-etl
+    volumes:
+      - ../:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongo
+      - solr
+    environment:
+      - NODE_ENV=development
+      - CONFIG_FILE=./config/config.json
+    # command: npx nodemon
+    working_dir: /usr/src/app
+
+  mongo:
+    image: mongo:7
+    container_name: bartoc-mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    command: ["--replSet", "rs0"]
+
+  solr:
+    image: solr:8
+    container_name: bartoc-solr
+    ports:
+      - "8983:8983"
+    volumes:
+      - solr_data:/var/solr
+    command:
+      - solr-precreate
+      - bartoc
+
+volumes:
+  mongo_data:
+  solr_data:

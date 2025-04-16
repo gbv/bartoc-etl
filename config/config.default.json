@@ -4,7 +4,7 @@
   "mongo": {
     "user": "",
     "pass": "",
-    "host": "127.0.0.1",
+    "host": "mongo",
     "port": 27017,
     "db": "jskos-server",
     "options": {
@@ -14,7 +14,7 @@
     }
   },
   "solr": {
-    "host": "127.0.0.1",
+    "host": "solr",
     "port": 8983,
     "version": 8.1
   },
