@@ -26,8 +26,10 @@ export interface AppConfig {
   baseUrl?: string | null;
   closedWorldAssumption?: boolean;
   env: string;
+  loadNdjsonData?: boolean;
   logLevel: string;
   mongo: MongoConfig;
+  ndJsonDataPath?: string;
   port: number;
   proxies?: string[];
   solr: SolrConfig;

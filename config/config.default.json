@@ -1,6 +1,7 @@
 {
   "baseUrl": null,
   "closedWorldAssumption": true,
+  "loadNdjsonData": false,
   "mongo": {
     "user": "",
     "pass": "",

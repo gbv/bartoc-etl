@@ -12,8 +12,10 @@ dotenv.config();
 const env = process.env.NODE_ENV ?? "development";
 const configFile = process.env.CONFIG_FILE || "./config/config.json";
 const defaultFile = "./config/config.default.json";
+const ndJsonFile = "./data/latest.ndjson";
 const configFilePath = path.resolve(process.cwd(), configFile);
 const defaultFilePath = path.resolve(process.cwd(), defaultFile);
+const dataFilePath = path.resolve(process.cwd(), ndJsonFile);
 export const infoPackage = packageInfo;
 
 // If file doesn't exist, create it with an empty object
@@ -32,6 +34,11 @@ config.mongo.url = `mongodb://${config.mongo.auth}${config.mongo.host}:${config.
 
 // Build solr url, basic only for local development
 config.solr.url = `http://${config.solr.host}:${config.solr.port}/solr`;
+
+// Build ndJson data path
+if (config.loadNdjsonData && config.loadNdjsonData === true) {
+  config.ndJsonDataPath = dataFilePath;
+}
 
 // Logging section
 function isValidVerbosity(v: unknown): v is Verbosity {
