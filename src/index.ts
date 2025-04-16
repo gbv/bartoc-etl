@@ -15,19 +15,5 @@ const startDB = async () => {
 // Startig and try connection to the mongodb instance
 startDB();
 
-const pingSolr = async () => {
-  // Check Connection to Solr
-  const pingOp = new SolrClient(8.5).collectionOperation.preparePing("bartoc");
-  try {
-    const isAlive = await pingOp.execute<PingResponse>();
-    config.log?.("✅ Solr is reachable with status", isAlive.status);
-  } catch (error) {
-    config.error?.("❌ Solr request failed");
-    throw new SolrPingError();
-  }
-};
-
-pingSolr();
-
 // Starting the server without wait for mongodb connection
 export const server = startServer();
