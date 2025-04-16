@@ -7,7 +7,6 @@ dist/
 # TypeScript build artifacts
 *.js
 *.js.map
-*.d.ts
 
 # Temporary files
 tmp/
