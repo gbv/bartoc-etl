@@ -25,7 +25,15 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
-    command: ["--replSet", "rs0"]
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0" ]
+
+  mongosetup:
+    image: mongo:7
+    depends_on:
+      - mongo
+    volumes: 
+      - ./mongo-initdb.d:/docker-entrypoint-initdb.d
+    restart: "no"
 
   solr:
     image: solr:8

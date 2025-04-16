@@ -16,7 +16,7 @@ const startDB = async () => {
 startDB();
 
 const pingSolr = async () => {
-  // Connecting to Solr
+  // Check Connection to Solr
   const pingOp = new SolrClient(8.5).collectionOperation.preparePing("bartoc");
   try {
     const isAlive = await pingOp.execute<PingResponse>();

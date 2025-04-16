@@ -1,23 +1,21 @@
-# Dockerfile - sviluppo per app ETL Bartoc
-
-# Base image con Node.js
+# Base Image with node
 FROM node:23-alpine
 
-# Imposta la working directory
+# Working directory
 WORKDIR /usr/src/app
 
-# Copia i file di configurazione e dipendenze
+# Copy config files and dependencies
 COPY package*.json tsconfig.json ./
 COPY nodemon.json ./
 
-# Installa le dipendenze (inclusi devDependencies)
+# Install dependencies (included dev dependencies)
 RUN npm ci
 
-# Copia tutto il codice sorgente
+# Copy all the source code
 COPY . .
 
-# Espone la porta dell'app
+# Expose to port 3000
 EXPOSE 3000
 
-# Comando di default: avvia in modalità sviluppo con nodemon
+# Command to run
 CMD ["npm", "run" , "dev"]

@@ -35,6 +35,7 @@ export async function connect(retry: boolean = false) {
   if (!retry) addErrorHandler();
 
   const uri = `${config.mongo.url}/${config.mongo.db}`;
+
   let result: typeof mongoose | undefined;
 
   while (!result) {
@@ -56,9 +57,12 @@ export async function connect(retry: boolean = false) {
 
   if (retry) addErrorHandler();
 
-  // Verify Meta collection and initialitation database
   if (connection) {
+    // Verify Meta collection and initialitation database
     await checkAndInitMeta(connection, version);
+
+    // Verify configuration for ReplicaSet
+    await ensureReplicaSet();
   }
 
   return result;
@@ -75,6 +79,43 @@ export function getDb(): Db {
     throw new Error("❌ MongoDB not connected yet. Call connect() first.");
   }
   return db;
+}
+
+export async function ensureReplicaSet(): Promise<void> {
+  const admin = getDb().admin();
+
+  try {
+    const status = await admin.command({ replSetGetStatus: 1 });
+    if (status.ok === 1) {
+      config.log?.("✅ Replica Set already initialized.");
+    }
+  } catch (error) {
+    const msg = (error as Error).message;
+    if (msg.includes("not running with --replSet")) {
+      config.warn?.(
+        "⚠️ MongoDB not running as a Replica Set. Attempting rs.initiate()...",
+      );
+
+      try {
+        await admin.command({
+          replSetInitiate: {
+            _id: "rs0",
+            members: [
+              { _id: 0, host: `${config.mongo.host}:${config.mongo.port}` },
+            ],
+          },
+        });
+        config.log?.("✅ Replica Set initialized.");
+      } catch (initError) {
+        config.error?.(
+          "❌ Failed to initiate Replica Set:",
+          (initError as Error).message,
+        );
+      }
+    } else {
+      config.error?.("❌ Unexpected error while checking Replica Set:", msg);
+    }
+  }
 }
 
 export { mongoose, connection };
