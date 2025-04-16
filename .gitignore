@@ -29,6 +29,7 @@ logs/
 .idea/
 *.sublime-project
 *.sublime-workspace
+*.code-workspace
 
 # OS specific files
 .DS_Store
