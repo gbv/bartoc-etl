@@ -4,43 +4,87 @@ Prototype ETL pipeline for indexing Bartoc data from MongoDB into Solr.
 
 ~~~mermaid
 graph TD
-  A[(🍃 MongoDB)] --> B[ETL Component - Node.js + Vite + TypeScript]
-  B --> C[(Solr Index)]
-  C --> D[Bartoc Frontend App]
-  D --> C
-
   subgraph Backend
-    A
-    B
-    C
+    A[(🍃 MongoDB)]
+    B[[⚙️ ETL Component\nNode.js + TypeScript]]
+    C[(🔎 Solr Index)]
   end
 
   subgraph Frontend
-    D
+    D[[🖥️ Bartoc Frontend App]]
   end
+
+  A -->|Extract_initial_load| B
+  A -- Change_Stream --> B
+  B -->|Transform_and_Load| C
+  D -->|Query| C
+  C -->|Results| D
 ~~~
 
 ### Project root structure
 ```pgsql
-bartoc-etl/
-├── node_modules/
-├── solr-configs/
-│   └── bartoc/
-│       └── conf/
-│           ├── schema.xml
-│           └── solrconfig.xml
-├── src/
-│   ├── extract/
-│       └── readNdjson.ts
-│   ├── transform/
-│       └── transformToSolr.ts
-│   └── types/
-│       ├── jskos.ts
-│       └── solr.ts
-├── main.ts
+.
+├── api-test.http
+├── bartoc-etl.code-workspace
+├── config
+│   ├── config.default.json
+│   └── config.json
+├── data
+│   └── latest.ndjson
+├── docker
+│   ├── docker-compose.yml
+│   ├── Dockerfile
+│   └── mongo-initdb.d
+│       └── mongo_setup.sh
+├── eslint.config.mjs
+├── jest.config.mjs
+├── nodemon.json
 ├── package.json
-├── tsconfig.json
-└── vite.config.ts
+├── package-lock.json
+├── README.md
+├── rorri.txt
+├── solr-configs
+│   └── bartoc
+│       └── conf
+├── src
+│   ├── conf
+│   │   ├── configValidation.ts
+│   │   └── conf.ts
+│   ├── data
+│   │   └── seedTerminologies.ts
+│   ├── errors
+│   │   └── errors.ts
+│   ├── extract
+│   │   └── readNdjson.ts
+│   ├── index.ts
+│   ├── load
+│   │   └── loadToSolr.ts
+│   ├── models
+│   │   ├── meta.ts
+│   │   └── terminology.ts
+│   ├── mongo
+│   │   ├── initMeta.ts
+│   │   ├── mongo.ts
+│   │   ├── terminologySchemaValidation.ts
+│   │   └── watchTerminologies.ts
+│   ├── server.ts
+│   ├── solr
+│   │   ├── CollectionOperation.ts
+│   │   ├── SolrClient.ts
+│   │   └── SolrRequest.ts
+│   ├── tests
+│   │   └── add.test.ts
+│   ├── transform
+│   │   └── transformToSolr.ts
+│   ├── types
+│   │   ├── conf.d.ts
+│   │   ├── jskos.ts
+│   │   ├── solr.ts
+│   │   └── terminology.d.ts
+│   ├── utils
+│   │   └── loadConfig.ts
+│   └── utils.ts
+└── tsconfig.json
 ```
 
 ### Setting Up a Local Solr Instance
