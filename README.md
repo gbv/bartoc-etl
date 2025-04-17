@@ -6,7 +6,7 @@ Prototype ETL pipeline for indexing Bartoc data from MongoDB into Solr.
 graph TD
   subgraph Backend
     A[(🍃 MongoDB)]
-    B[[⚙️ ETL Component\nNode.js + TypeScript]]
+    B[[⚙️ ETL Express + TypeScript]]
     C[(🔎 Solr Index)]
   end
 
@@ -21,71 +21,8 @@ graph TD
   C -->|Results| D
 ~~~
 
-### Project root structure
-```pgsql
-.
-├── api-test.http
-├── bartoc-etl.code-workspace
-├── config
-│   ├── config.default.json
-│   └── config.json
-├── data
-│   └── latest.ndjson
-├── docker
-│   ├── docker-compose.yml
-│   ├── Dockerfile
-│   └── mongo-initdb.d
-│       └── mongo_setup.sh
-├── eslint.config.mjs
-├── jest.config.mjs
-├── nodemon.json
-├── package.json
-├── package-lock.json
-├── README.md
-├── rorri.txt
-├── solr-configs
-│   └── bartoc
-│       └── conf
-├── src
-│   ├── conf
-│   │   ├── configValidation.ts
-│   │   └── conf.ts
-│   ├── data
-│   │   └── seedTerminologies.ts
-│   ├── errors
-│   │   └── errors.ts
-│   ├── extract
-│   │   └── readNdjson.ts
-│   ├── index.ts
-│   ├── load
-│   │   └── loadToSolr.ts
-│   ├── models
-│   │   ├── meta.ts
-│   │   └── terminology.ts
-│   ├── mongo
-│   │   ├── initMeta.ts
-│   │   ├── mongo.ts
-│   │   ├── terminologySchemaValidation.ts
-│   │   └── watchTerminologies.ts
-│   ├── server.ts
-│   ├── solr
-│   │   ├── CollectionOperation.ts
-│   │   ├── SolrClient.ts
-│   │   └── SolrRequest.ts
-│   ├── tests
-│   │   └── add.test.ts
-│   ├── transform
-│   │   └── transformToSolr.ts
-│   ├── types
-│   │   ├── conf.d.ts
-│   │   ├── jskos.ts
-│   │   ├── solr.ts
-│   │   └── terminology.d.ts
-│   ├── utils
-│   │   └── loadConfig.ts
-│   └── utils.ts
-└── tsconfig.json
-```
+
+# WIP NOT RELIABLE ATM 
 
 ### Setting Up a Local Solr Instance
 

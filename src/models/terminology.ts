@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document, Model } from "mongoose";
-import type { JskosDocument } from "../types/jskos"; // ← assuming you defined the interface here
+import type { JskosDocument } from "../types/jskos";
 
 const TerminologySchema = new Schema<JskosDocument>(
   {

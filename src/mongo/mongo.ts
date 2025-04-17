@@ -1,9 +1,8 @@
 import mongoose, { Connection } from "mongoose";
 import type { Db } from "mongodb";
 import config, { infoPackage } from "../conf/conf";
-import checkAndInitMeta from "./initMeta";
-// import { getUpgrades } from "./utils/version";
-// import { Meta } from "./models/meta";
+import checkAndInitDbCollections from "./initCollections";
+
 const version = infoPackage.version;
 let db: Db | undefined;
 const connection: Connection = mongoose.connection;
@@ -59,7 +58,7 @@ export async function connect(retry: boolean = false) {
 
   if (connection) {
     // Verify Meta collection and initialitation database
-    await checkAndInitMeta(connection, version);
+    await checkAndInitDbCollections(connection, version);
 
     // Verify configuration for ReplicaSet
     await ensureReplicaSet();

@@ -1,19 +1,41 @@
 import { startServer } from "./server";
-import { connect } from "./mongo/mongo";
+import * as db from "./mongo/mongo";
+import * as solr from "./solr/solr";
 import { watchTerminologies } from "./mongo/watchTerminologies";
-import { SolrClient } from "./solr/SolrClient";
 import config from "./conf/conf";
-import { PingResponse } from "./types/solr";
-import { SolrPingError } from "./errors/errors";
 
-const startDB = async () => {
-  // passing true means that retry is active
-  await connect(true);
+const mongoDbConnection = db.connection;
+
+// Database connection
+const startMongoDB = async () => {
+  try {
+    await db.connect(true);
+  } catch (error) {
+    config.warn?.(
+      "Error connecting to database, reconnect in a few seconds...",
+    );
+  }
+
   // Watching for changes in realt time, only for inserting events
   await watchTerminologies();
 };
+
+// Solr Connection
+const startSolr = async () => {
+  try {
+    await solr.connectToSolr();
+  } catch (error) {
+    config.error?.("Error connecting to Solr");
+  }
+};
+
 // Startig and try connection to the mongodb instance
-startDB();
+startMongoDB();
+
+// Starting Solr
+startSolr();
 
 // Starting the server without wait for mongodb connection
-export const server = startServer();
+const app = startServer();
+
+export { app, mongoDbConnection };
