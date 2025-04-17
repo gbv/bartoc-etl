@@ -17,7 +17,7 @@ export async function connectToSolr(): Promise<void> {
       config.warn?.(
         "⚠️ Solr server is reachable but not healthy (ping failed). Skipping initialization.",
       );
-      return;
+      throw new Error() as SolrPingError;
     }
 
     config.log?.("✅ Connected to Solr and ping successful.");
@@ -25,6 +25,8 @@ export async function connectToSolr(): Promise<void> {
     //TODO List available cores?
 
     //TODO Optional: Check configsets (advanced)
+
+    //TODO When index data?
 
     initialized = true;
   } catch (error) {

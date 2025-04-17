@@ -72,7 +72,7 @@ const checkAndInitDbCollections = async (
 
 export async function importFromNDJSON(filePath: string): Promise<void> {
   if (!filePath) {
-    console.error("❌ Problem with path");
+    config.error?.("❌ Problem with path");
   }
 
   const fileStream = fs.createReadStream(filePath);
@@ -90,7 +90,10 @@ export async function importFromNDJSON(filePath: string): Promise<void> {
       const parsed = JSON.parse(line);
       const validation = terminologyZodSchema.safeParse(parsed);
       if (!validation.success) {
-        console.error("❌ Validation failed:", validation.error.format());
+        config.error?.(
+          "❌ Validation failed because of:",
+          JSON.stringify(validation.error.format(), null, 2),
+        );
         errors++;
         continue;
       }
@@ -98,11 +101,16 @@ export async function importFromNDJSON(filePath: string): Promise<void> {
       const terminology = new Terminology(validation.data);
       await terminology.save();
       success++;
-    } catch (err) {
-      console.error("❌ Failed to process line:", err);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      config.error?.("❌ Failed to process line:", message);
       errors++;
     }
   }
+
+  config.log?.(`📊 Total documents are ${success + errors}`);
+  config.log?.(`✅ Loaded ${success} documents`);
+  config.log?.(`❌ Errors of validation in ${errors} documents`);
 }
 
 export default checkAndInitDbCollections;
