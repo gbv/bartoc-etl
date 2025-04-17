@@ -42,35 +42,24 @@ const checkAndInitDbCollections = async (
         config.log?.(
           "📦 Created terminologies collection because it didn't exist.",
         );
+
+        const docCount = await mongoose.connection
+          .collection("terminologies")
+          .countDocuments();
+
+        if (docCount === 0) {
+          config.warn?.("📭 'terminologies' collection is empty.");
+
+          if (config.loadNdjsonData) {
+            const filePath = config.ndJsonDataPath ?? "";
+            config.log?.(`📂 Starting NDJSON import from: ${filePath}`);
+            await importFromNDJSON(filePath);
+          }
+        }
       } catch (err) {
         config.error?.(
           "❌ Failed to create terminologies collection:",
           (err as Error).message,
-        );
-      }
-    }
-
-    if (collections.length) {
-      config.log?.(
-        "We have set up the following collections",
-        collections.toString(),
-      );
-      const terminologiesDocs = await connection
-        .collection("terminologies")
-        .countDocuments();
-
-      if (!terminologiesDocs) {
-        config.log?.("Collection terminologies is empty");
-        if (terminologiesDocs === 0 && config.loadNdjsonData === true) {
-          // This means that the collection is
-          await importFromNDJSON(
-            config.ndJsonDataPath ? config.ndJsonDataPath : "",
-          );
-        }
-      } else {
-        config.log?.(
-          "collection terminologies length is",
-          terminologiesDocs.toString(),
         );
       }
     }
