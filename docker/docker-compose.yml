@@ -42,9 +42,11 @@ services:
       - "8983:8983"
     volumes:
       - solr_data:/var/solr
+      - ./solr-config/bartoc-configset:/configsets/bartoc-configset
     command:
       - solr-precreate
       - bartoc
+      - /configsets/bartoc-configset
 
 volumes:
   mongo_data:

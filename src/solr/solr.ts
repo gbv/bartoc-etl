@@ -22,17 +22,9 @@ export async function connectToSolr(): Promise<void> {
 
     config.log?.("✅ Connected to Solr and ping successful.");
 
-    /*  // List available cores
-    const cores = await solr.getCores();
-    if (!cores.includes("bartoc")) {
-      config.warn?.("ℹ️ Solr core 'bartoc' not found. Attempting creation...");
-      await solr.createCore("bartoc");
-      config.log?.("✅ Core 'bartoc' created.");
-    } else {
-      config.log?.("✅ Solr core 'bartoc' already exists.");
-    } */
+    //TODO List available cores?
 
-    // Optional: Check configsets (advanced)
+    //TODO Optional: Check configsets (advanced)
 
     initialized = true;
   } catch (error) {
