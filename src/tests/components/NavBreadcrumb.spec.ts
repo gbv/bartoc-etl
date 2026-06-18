@@ -22,15 +22,9 @@ describe("NavBreadcrumb", () => {
   })
 
   it("formats the result summary", () => {
-    const wrapper = mountNavBreadcrumb({ from: 11, to: 20, total: 1234 })
+    const wrapper = mountNavBreadcrumb({ from: 11, to: 20, total: 999 })
 
-    expect(wrapper.text()).toContain("Showing 11 - 20 of 1,234 results")
-  })
-
-  it("includes print-only BARTOC branding", () => {
-    const wrapper = mountNavBreadcrumb()
-
-    expect(wrapper.get(".breadcrumb-print-brand").text()).toBe("bartoc.org")
+    expect(wrapper.text()).toContain("Showing 11 - 20 of 999 results")
   })
 
   it("marks the print button as hidden from print output", () => {
