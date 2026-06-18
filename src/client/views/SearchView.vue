@@ -8,7 +8,7 @@ facets down * into SearchResults and SearchSidebar components. */
 
   <section class="search-view__wrapper app-container">
     <SearchBar
-      class="search-bar__area noprint"
+      class="search-bar__area"
       :search-on-mounted="true"
       @lookup-uri="onInspect"
       @search="onSearch" />

@@ -2,7 +2,6 @@
   <nav
     aria-label="Search results summary"
     class="breadcrumb breadcrumb--with-actions">
-    <span class="breadcrumb-print-brand">bartoc.org</span>
     <ol class="breadcrumb-list">
       <li class="breadcrumb-item">
         {{ formattedSummary }}
@@ -19,14 +18,12 @@
         size="16"
         stroke-width="2"
         aria-hidden="true" />
-      <span>Print Results</span>
+      <span>Print</span>
     </button>
   </nav>
 </template>
 
 <script>
-const PRINT_RESULTS_CLASS = "print-search-results"
-
 export default {
   name: "NavBreadcrumb",
   props: {
@@ -67,14 +64,14 @@ export default {
 
       const body = window.document?.body
       const cleanupPrintMode = () => {
-        body?.classList.remove(PRINT_RESULTS_CLASS)
+        body?.classList.remove("print-search-results")
       }
       const unregisterPrintCleanup = () => {
         window.removeEventListener?.("afterprint", cleanupPrintMode)
       }
 
       // The body class scopes print CSS to the compact search-results layout.
-      body?.classList.add(PRINT_RESULTS_CLASS)
+      body?.classList.add("print-search-results")
       // In the normal print flow, once:true lets the browser remove this listener.
       window.addEventListener?.("afterprint", cleanupPrintMode, { once: true })
 
@@ -103,10 +100,6 @@ export default {
   justify-self: center;
 }
 
-.breadcrumb-print-brand {
-  display: none;
-}
-
 .breadcrumb-print {
   grid-column: 3;
   display: inline-flex;
@@ -120,14 +113,6 @@ export default {
 @media print {
   .breadcrumb--with-actions {
     display: block;
-  }
-
-  .breadcrumb-print-brand {
-    display: block;
-    margin-bottom: 0.25rem;
-    color: #000;
-    font-size: 1rem;
-    font-weight: 700;
   }
 }
 </style>

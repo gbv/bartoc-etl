@@ -30,7 +30,7 @@
         <strong>Published by </strong> {{ doc.publisher_labels_ss[0] }}
       </li>
     </ul>
-    <div class="result-metadata">
+    <div class="result-metadata noprint">
       <span
         v-if="doc.created_dt"
         :class="{ highlighted: sort == 'created' }">
