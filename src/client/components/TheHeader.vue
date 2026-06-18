@@ -1,5 +1,5 @@
 <template>
-  <header class="header">
+  <header class="header noprint">
     <div class="header__container">
       <div class="header__logo no-hover">
         <a href="/">

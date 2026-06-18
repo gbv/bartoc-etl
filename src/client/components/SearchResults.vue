@@ -30,7 +30,7 @@
     <!-- Result actions -->
     <div
       v-if="results.docs.length > 0"
-      class="search-results__actions">
+      class="search-results__actions noprint">
       <div
         v-if="results.docs.length < results.numFound && !loading"
         class="result-actions__main">

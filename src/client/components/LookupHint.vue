@@ -45,7 +45,7 @@ const showBartocOnly = computed(() => {
 <template>
   <div
     v-if="hasData"
-    class="lookup-message">
+    class="lookup-message noprint">
     <span class="lookup-message__uri">
       <a
         :href="uri"

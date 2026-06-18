@@ -42,7 +42,7 @@ onBeforeUnmount(() => {
   <button
     v-if="isVisible"
     type="button"
-    class="back-to-top"
+    class="back-to-top noprint"
     aria-label="Back to top"
     @click="scrollToTop">
     <vue-feather

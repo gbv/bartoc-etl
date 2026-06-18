@@ -1,5 +1,5 @@
 <template>
-  <footer>
+  <footer class="noprint">
     <div>
       <span v-if="apiStatus.solr.connected">
         search in <b>{{ apiStatus.solr.indexedRecords }}</b> terminologies

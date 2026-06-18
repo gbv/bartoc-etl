@@ -7,7 +7,7 @@
       <span class="filter-badge__value">{{ displayValue }}</span>
     </span>
     <button
-      class="filter-badge__close"
+      class="filter-badge__close noprint"
       :aria-label="`Remove Badge ${label}: ${displayValue}`"
       type="button"
       @click="emit('remove-badge')" />

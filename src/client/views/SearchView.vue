@@ -8,7 +8,7 @@ facets down * into SearchResults and SearchSidebar components. */
 
   <section class="search-view__wrapper app-container">
     <SearchBar
-      class="search-bar__area"
+      class="search-bar__area noprint"
       :search-on-mounted="true"
       @lookup-uri="onInspect"
       @search="onSearch" />
@@ -35,7 +35,7 @@ facets down * into SearchResults and SearchSidebar components. */
         :active-filters="activeFilters"
         @clear-filters="onClearFilters" />
     </div>
-    <aside class="search-sidebar__area">
+    <aside class="search-sidebar__area noprint">
       <SearchSidebar
         v-if="results.numFound > 0"
         :facets="results.facets || {}"

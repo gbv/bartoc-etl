@@ -33,6 +33,12 @@ describe("NavBreadcrumb", () => {
     expect(wrapper.get(".breadcrumb-print-brand").text()).toBe("bartoc.org")
   })
 
+  it("marks the print button as hidden from print output", () => {
+    const wrapper = mountNavBreadcrumb()
+
+    expect(wrapper.get(".breadcrumb-print").classes()).toContain("noprint")
+  })
+
   it("enables restricted print mode while printing", async () => {
     const print = vi.spyOn(window, "print").mockImplementation(() => {})
     const wrapper = mountNavBreadcrumb()

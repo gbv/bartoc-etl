@@ -162,21 +162,12 @@ button:focus-visible {
 }
 
 @media print {
-  body.print-search-results {
-    background: #fff;
+  .noprint {
+    display: none !important;
   }
 
-  body.print-search-results .header,
-  body.print-search-results footer,
-  body.print-search-results .back-to-top,
-  body.print-search-results .search-bar__area,
-  body.print-search-results .search-sidebar__area,
-  body.print-search-results .search-sort,
-  body.print-search-results .lookup-message,
-  body.print-search-results .badges__wrapper > .button,
-  body.print-search-results .filter-badge__close,
-  body.print-search-results .search-results__actions {
-    display: none !important;
+  body.print-search-results {
+    background: #fff;
   }
 
   body.print-search-results #app,

@@ -10,7 +10,7 @@
     </ol>
     <button
       type="button"
-      class="button breadcrumb-print"
+      class="button breadcrumb-print noprint"
       aria-label="Print search results"
       title="Print search results"
       @click="printPage">
@@ -128,10 +128,6 @@ export default {
     color: #000;
     font-size: 1rem;
     font-weight: 700;
-  }
-
-  .breadcrumb-print {
-    display: none;
   }
 }
 </style>

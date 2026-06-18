@@ -2,7 +2,7 @@
   <div class="search-controls__wrapper">
     <!-- Sort dropdown -->
     <form
-      class="search-sort"
+      class="search-sort noprint"
       @submit.prevent>
       <label for="sort">Sort by</label>
       <select
@@ -35,7 +35,7 @@
           :value="badge.value"
           @remove-badge="onRemoveBadge(badge)" />
         <button
-          class="button"
+          class="button noprint"
           :aria-label="`Clear Filters`"
           type="button"
           @click="emit('clear-filters')">
