@@ -125,10 +125,9 @@ button:focus-visible {
   display: flex;
   align-items: center;
   justify-content: center;
-
-  width: 100%;
+  max-width: 1320px;
   height: 50px;
-  margin: 0;
+  margin: 0 auto;
   padding: 0.5rem 1.5rem;
 
   background-color: var(--color-breadcrumb-background);
@@ -160,6 +159,90 @@ button:focus-visible {
 
 .breadcrumb-item a:hover {
   text-decoration: underline;
+}
+
+@media print {
+  body.print-search-results {
+    background: #fff;
+  }
+
+  body.print-search-results .header,
+  body.print-search-results footer,
+  body.print-search-results .back-to-top,
+  body.print-search-results .search-bar__area,
+  body.print-search-results .search-sidebar__area,
+  body.print-search-results .search-sort,
+  body.print-search-results .lookup-message,
+  body.print-search-results .badges__wrapper > .button,
+  body.print-search-results .filter-badge__close,
+  body.print-search-results .search-results__actions {
+    display: none !important;
+  }
+
+  body.print-search-results #app,
+  body.print-search-results #app > main,
+  body.print-search-results .search-view__wrapper {
+    display: block;
+    width: 100%;
+    max-width: none;
+    min-height: 0;
+    margin: 0;
+  }
+
+  body.print-search-results .breadcrumb {
+    height: auto;
+    justify-content: flex-start;
+    padding: 0 0 0.75rem;
+    background: #fff;
+    border-bottom: 1px solid #d0d0d0;
+    box-shadow: none;
+  }
+
+  body.print-search-results .search-controls__area {
+    display: block;
+    width: 100%;
+    margin: 0.75rem 0 1rem;
+  }
+
+  body.print-search-results .search-controls__wrapper,
+  body.print-search-results .search-filters {
+    display: block;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  body.print-search-results .badges__wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 0.5rem;
+  }
+
+  body.print-search-results .filter-badge {
+    break-inside: avoid;
+    margin: 0;
+    padding: 0.2rem 0.4rem;
+    text-transform: none;
+    border: 1px solid #d0d0d0;
+    border-radius: 4px;
+  }
+
+  body.print-search-results .search-results__area,
+  body.print-search-results .search-view-results__wrapper {
+    display: block;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+  }
+
+  body.print-search-results .result-card {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin: 0 0 0.75rem;
+    background: #fff;
+    border-color: #d0d0d0;
+    box-shadow: none;
+  }
 }
 
 /* Shared button-like style */
