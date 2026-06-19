@@ -18,7 +18,7 @@ export interface RegistryEntry {
   uri: string;                         // repeated self-URI
   url?: string;
 
-  prefLabel?: LangMap; // { en: "Title", de?: "…" }
+  prefLabel?: Record<string, string>; // { en: "Title", de?: "…" }
   altLabel?: LangMap; // { en: ["A", "B"] }
   definition?: LangMap; // { en: ["…", "…"] }
 
@@ -36,14 +36,13 @@ export interface RegistryEntry {
   [prop: string]: unknown;
 }
 
-// The file you showed is a map from registry URI -> entry
-export type RegistryIndex = Record<string, RegistryEntry>;
+export type RegistryIndex = RegistryEntry[];
 
 
 export async function loadRegistryIndex(filePath: string): Promise<RegistryIndex> {
   const text = await fs.readFile(filePath, "utf8");
   const data = JSON.parse(text);
-  if (!data || typeof data !== "object") {
+  if (!Array.isArray(data)) {
     throw new Error("Invalid registry index JSON");
   }
   return data as RegistryIndex;
@@ -66,13 +65,15 @@ export async function buildListedInLabels(
   const finalPath = path.join(outDir, "listed_in.json");
   const tmpPath = finalPath + ".tmp";
 
-  // load the registries index (object keyed by registry URI)
+  // load the registries
   const registryIdx = await loadRegistryIndex(snapshotPath);
 
   // compose mapping { uri -> label }
-  const out: Record<string, string[]> = {};
-  for (const [uri, entry] of Object.entries(registryIdx)) {
-    out[uri] = entry.prefLabel?.en ?? [];
+  const out: Record<string, string> = {};
+  for (const entry of registryIdx) {
+    if (entry.uri && entry.prefLabel?.en) {
+      out[entry.uri] = entry.prefLabel.en;
+    }
   }
 
   // atomic write
