@@ -119,6 +119,10 @@ button:focus-visible {
   box-shadow: none;
 }
 
+.printonly {
+  display: none !important;
+}
+
 /* Breadcrumb */
 .breadcrumb {
   font-size: 0.875rem;
@@ -166,12 +170,71 @@ button:focus-visible {
     display: none !important;
   }
 
-  body.print-search-results {
-    background: #fff;
+  .printonly {
+    display: block !important;
   }
 
-  body.print-search-results #app,
-  body.print-search-results #app > main,
+  body.print-search-results {
+    color: var(--black);
+    background: var(--white);
+  }
+
+  .header {
+    position: static;
+    color: var(--black);
+    background: var(--white);
+    box-shadow: none;
+  }
+
+  .print-header {
+    display: flex !important;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 0.6rem;
+    padding: 0 0 0.35rem;
+  }
+
+  .print-header__logo {
+    display: block;
+    width: auto;
+    height: 36px;
+  }
+
+  .print-header__text {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  footer {
+    margin-top: 0.75rem;
+    padding: 0.35rem 0 0;
+    color: var(--black);
+    background: var(--white);
+    text-align: left;
+    border-top: 1px solid var(--gray-600);
+  }
+
+  .print-footer {
+    margin: 0;
+    font-size: 10px;
+    line-height: 1.25;
+  }
+
+  body.print-search-results #app {
+    display: block;
+    width: 100%;
+    min-height: 0;
+    margin: 0;
+  }
+
+  body.print-search-results #app > main {
+    display: block;
+    width: 100%;
+    min-height: 0;
+    margin: 0;
+  }
+
   body.print-search-results .search-view__wrapper {
     display: block;
     width: 100%;
@@ -183,22 +246,33 @@ button:focus-visible {
   body.print-search-results .breadcrumb {
     height: auto;
     justify-content: flex-start;
-    padding: 0 0 0.75rem;
-    background: #fff;
-    border-bottom: 1px solid #d0d0d0;
+    padding: 0 0 0.35rem;
+    font-size: 12px;
+    color: var(--black);
+    background: var(--white);
+    border-bottom: 0;
     box-shadow: none;
   }
 
   body.print-search-results .search-controls__area {
     display: block;
     width: 100%;
-    margin: 0.75rem 0 1rem;
+    max-width: none;
+    margin: 0.45rem 0 0.65rem;
   }
 
-  body.print-search-results .search-controls__wrapper,
+  body.print-search-results .search-controls__wrapper {
+    display: block;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+
   body.print-search-results .search-filters {
     display: block;
     width: 100%;
+    max-width: none;
     margin: 0;
     padding: 0;
   }
@@ -212,13 +286,20 @@ button:focus-visible {
   body.print-search-results .filter-badge {
     break-inside: avoid;
     margin: 0;
-    padding: 0.2rem 0.4rem;
+    padding: 0.1rem 0.25rem;
+    font-size: 10px;
     text-transform: none;
-    border: 1px solid #d0d0d0;
+    border: 1px solid var(--gray-300);
     border-radius: 4px;
   }
 
-  body.print-search-results .search-results__area,
+  body.print-search-results .search-results__area {
+    display: block;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+  }
+
   body.print-search-results .search-view-results__wrapper {
     display: block;
     width: 100%;
@@ -229,10 +310,42 @@ button:focus-visible {
   body.print-search-results .result-card {
     break-inside: avoid;
     page-break-inside: avoid;
-    margin: 0 0 0.75rem;
-    background: #fff;
-    border-color: #d0d0d0;
+    margin: 0 0 0.35rem;
+    padding: 0.25rem 0 0.35rem;
+    color: var(--black);
+    background: var(--white);
+    border: 0;
+    border-radius: 0;
     box-shadow: none;
+    transform: none;
+  }
+
+  body.print-search-results .result-title {
+    margin: 0 0 0.15rem;
+    padding: 0;
+    font-size: 14px;
+    line-height: 1.2;
+    border-bottom: 0;
+  }
+
+  body.print-search-results .result-title a {
+    color: var(--black);
+  }
+
+  body.print-search-results .result-description {
+    margin: 0 0 0.15rem;
+    font-size: 10px;
+    line-height: 1.25;
+  }
+
+  body.print-search-results .result-details {
+    margin: 0;
+  }
+
+  body.print-search-results .result-details li {
+    margin-bottom: 0.1rem;
+    font-size: 10px;
+    line-height: 1.2;
   }
 }
 
@@ -242,7 +355,7 @@ button:focus-visible {
   margin: 10px;
   padding: 0.75rem 1.5rem;
 
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 500;
 
   background-color: var(--color-button-background);

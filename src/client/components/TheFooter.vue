@@ -1,6 +1,6 @@
 <template>
-  <footer class="noprint">
-    <div>
+  <footer>
+    <div class="noprint">
       <span v-if="apiStatus.solr.connected">
         search in <b>{{ apiStatus.solr.indexedRecords }}</b> terminologies
         (as of <b>{{ apiStatus.solr.lastIndexedAt }}</b>,
@@ -13,10 +13,10 @@
       |
       <a href="https://github.com/gbv/bartoc-search">sources</a>
     </div>
-    <p>
+    <p class="noprint">
       BARTOC.org vocabulary metadata is <a href="/download">made available</a> under the <a href="http://www.opendatacommons.org/licenses/pddl/1.0/">PDDL 1.0</a>
     </p>
-    <div>
+    <div class="noprint">
       <a href="/api/">JSKOS API</a>
       |
       <a
@@ -27,6 +27,9 @@
       |
       <a href="https://github.com/gbv/bartoc.org/issues">issues</a>
     </div>
+    <p class="print-footer printonly">
+      BARTOC.org vocabulary metadata is made available under the PDDL 1.0.
+    </p>
   </footer>
 </template>
 

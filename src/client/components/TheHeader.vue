@@ -1,6 +1,6 @@
 <template>
-  <header class="header noprint">
-    <div class="header__container">
+  <header class="header">
+    <div class="header__container noprint">
       <div class="header__logo no-hover">
         <a href="/">
           <img
@@ -34,9 +34,21 @@
         </div>
       </nav>
     </div>
+    <div
+      class="print-header printonly"
+      aria-hidden="true">
+      <img
+        :src="printLogoUrl"
+        alt=""
+        class="print-header__logo">
+      <span class="print-header__text">
+        Basic Register of Thesauri, Ontologies & Classifications (BARTOC.org)
+      </span>
+    </div>
   </header>
 </template>
 
 <script setup>
 import logoUrl from "../assets/bartoc-logo.svg"
+import printLogoUrl from "../assets/bartoc-logo_for_print.svg"
 </script>
