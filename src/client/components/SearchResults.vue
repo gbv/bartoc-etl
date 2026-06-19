@@ -26,38 +26,6 @@
         :doc="doc" 
         :sort="sortBy" />
     </div>
-    
-    <!-- Result actions -->
-    <div
-      v-if="results.docs.length > 0"
-      class="search-results__actions noprint">
-      <div
-        v-if="results.docs.length < results.numFound && !loading"
-        class="result-actions__main">
-        <button
-          class="button result-action__button load-more__button"
-          type="button"
-          @click="$emit('load-more')">
-          More
-        </button>
-
-        <button
-          class="button result-action__button show-all__button"
-          type="button"
-          @click="$emit('show-all')">
-          All ({{ results.numFound }})
-        </button>
-      </div>
-    
-      <a
-        v-if="downloadUrl"
-        class="button result-action__button download-results__button"
-        :href="downloadUrl"
-        download="bartoc-search-results.jskos.json"
-        type="application/json">
-        Download
-      </a>
-    </div>
   </section>
 </template>
 
@@ -71,15 +39,10 @@ const props = defineProps({
   loading: { type: Boolean, default: false },
   errorMessage: { type: String,  default: "" },
   sort: { type: String, default:"" },
-  downloadUrl: { type: String, default: "" },
 })
 
 // unwrap props into reactive refs
-const { results, loading, errorMessage, sort: sortBy, downloadUrl } = toRefs(props)
-
-
-// Declare emits for load more event
-defineEmits([ "load-more", "show-all" ])
+const { results, loading, errorMessage, sort: sortBy } = toRefs(props)
 
 // store DOM nodes for each rendered card
 const cardElements = ref([]) // HTMLElement[]
@@ -110,46 +73,6 @@ watch(
 </script>
 
 <style scoped>
-.search-results__actions {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  width: 100%;
-  margin: 2rem 0;
-}
-
-.result-actions__main {
-  grid-column: 2;
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-}
-
-.result-action__button {
-  margin: 0;
-  min-height: 42px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-}
-
-.load-more__button {
-  grid-column: 2;
-  justify-self: center;
-}
-
-.download-results__button {
-  grid-column: 3;
-  justify-self: end;
-}
-
-.search-results__actions a.button,
-.search-results__actions a.button:hover,
-.search-results__actions a.button:focus {
-  color: var(--color-button-text, var(--color-text-dark-1));
-  text-decoration: none;
-}
 .result-card-wrapper {
   scroll-margin-top: 80px;
 }
