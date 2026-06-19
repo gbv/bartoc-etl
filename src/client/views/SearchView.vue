@@ -4,8 +4,6 @@ repeatable ?filter=key:values syntax used by the API and the Vue store. * - Keep
 internal filter store in sync. * - Orchestrate data fetching (`/api/search`) and pass results +
 facets down * into SearchResults and SearchSidebar components. */
 <template>
-  <NavBreadcrumb :summary="summary" />
-
   <section class="search-view__wrapper app-container">
     <SearchBar
       class="search-bar__area"
@@ -20,15 +18,27 @@ facets down * into SearchResults and SearchSidebar components. */
       @remove-badge="onRemoveFilter"
       @clear-filters="onClearFilters" />
     <div class="search-results__area">
-      <SearchResults
-        v-if="loading || results.numFound > 0"
-        :results="results"
-        :loading="loading"
-        :error-message="errorMessage"
-        :sort="sortBy"
-        :download-url="downloadUrl"
-        @load-more="loadMore"
-        @show-all="showAll" />
+      <template v-if="loading || results.numFound > 0">
+        <SearchResultActions
+          v-if="showResultActions"
+          :summary="summary"
+          :can-load-more="canLoadMore"
+          :download-url="downloadUrl"
+          @load-more="loadMore"
+          @show-all="showAll" />
+        <SearchResults
+          :results="results"
+          :loading="loading"
+          :error-message="errorMessage"
+          :sort="sortBy" />
+        <SearchResultActions
+          v-if="showResultActions"
+          :summary="summary"
+          :can-load-more="canLoadMore"
+          :download-url="downloadUrl"
+          @load-more="loadMore"
+          @show-all="showAll" />
+      </template>
       <NoResults
         v-else
         :search="route.query.search || ''"
@@ -49,8 +59,8 @@ facets down * into SearchResults and SearchSidebar components. */
 import { ref, computed, onMounted } from "vue"
 import { useRouter, useRoute } from "vue-router"
 import SearchBar from "../components/SearchBar.vue"
-import NavBreadcrumb from "../components/NavBreadcrumb.vue"
 import SearchControls from "../components/SearchControls.vue"
+import SearchResultActions from "../components/SearchResultActions.vue"
 import SearchResults from "../components/SearchResults.vue"
 import SearchSidebar from "../components/SearchSidebar.vue"
 import NoResults from "../components/NoResults.vue"
@@ -104,12 +114,20 @@ const downloadUrl = computed(() => {
   return `${normalizedBase}api/search?${params.toString()}`
 })
 
-// Computed summary for breadcrumb data
+// Computed summary for result actions
 const summary = computed(() => ({
   from: 1,
   to: results.value.docs.length,
   total: results.value.numFound,
 }))
+
+const showResultActions = computed(() =>
+  !loading.value && !errorMessage.value && results.value.docs.length > 0,
+)
+
+const canLoadMore = computed(() =>
+  results.value.docs.length < results.value.numFound,
+)
 
 // derive the select-option key from the route
 const sortKey = computed(() => {

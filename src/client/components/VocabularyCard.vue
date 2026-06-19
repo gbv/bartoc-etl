@@ -162,7 +162,7 @@ const titleHref = computed(() => {
 
 <style>
 .result-card {
-  margin: 12px 8px;
+  margin: 12px 0;
   padding: 0.75rem 1rem;
   text-align: left;
   color: var(--color-text);
