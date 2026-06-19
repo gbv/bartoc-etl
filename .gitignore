@@ -48,3 +48,6 @@ data/lastIndexedAt.txt
 
 # Cron
 config/cron
+
+# Vitest coverage
+/coverage/
