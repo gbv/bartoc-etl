@@ -43,9 +43,7 @@ describe("TheHeader", () => {
     await flushPromises()
 
     expect(fetchMock).toHaveBeenCalledWith(
-      expect.stringMatching(
-        /\/api\/checkAuth\?type=schemes&action=create$/,
-      ),
+      "https://bartoc.org/api/checkAuth?type=schemes&action=create",
       {
         headers: {
           Authorization: "Bearer test-token",
@@ -54,7 +52,7 @@ describe("TheHeader", () => {
     )
 
     expect(wrapper.get(".header__add-button").attributes("href"))
-        .toMatch(/\/edit$/)
+        .toBe("https://bartoc.org/edit")
 
     token.value = null
     await flushPromises()

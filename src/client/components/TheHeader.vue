@@ -62,7 +62,7 @@ import printLogoUrl from "../assets/bartoc-logo_for_print.svg"
 
 const { token } = inject("login-refs")
 const userCanAdd = ref(false)
-const bartocBase = import.meta.env.DEV ? "https://bartoc.org" : ""
+const bartocBase = "https://bartoc.org"
 
 watch(token, async currentToken => {
   if (!currentToken) {
