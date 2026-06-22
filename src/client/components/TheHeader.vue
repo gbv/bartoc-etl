@@ -35,7 +35,7 @@
           <a
             v-if="userCanAdd"
             class="header__add-button"
-            :href="`${bartocBase}/edit`">
+            :href="editUrl">
             Add
           </a>
         </div>
@@ -62,7 +62,8 @@ import printLogoUrl from "../assets/bartoc-logo_for_print.svg"
 
 const { token } = inject("login-refs")
 const userCanAdd = ref(false)
-const bartocBase = "https://bartoc.org"
+const authBase = "https://bartoc.org"
+const editUrl = import.meta.env.DEV ? "https://dev.bartoc.org/edit" : "/edit"
 
 watch(token, async currentToken => {
   if (!currentToken) {
@@ -72,7 +73,7 @@ watch(token, async currentToken => {
 
   try {
     const response = await fetch(
-      `${bartocBase}/api/checkAuth?type=schemes&action=create`,
+      `${authBase}/api/checkAuth?type=schemes&action=create`,
       {
         headers: {
           Authorization: `Bearer ${currentToken}`,

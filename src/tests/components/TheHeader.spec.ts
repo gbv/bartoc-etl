@@ -52,7 +52,7 @@ describe("TheHeader", () => {
     )
 
     expect(wrapper.get(".header__add-button").attributes("href"))
-        .toBe("https://bartoc.org/edit")
+        .toBe("https://dev.bartoc.org/edit")
 
     token.value = null
     await flushPromises()
