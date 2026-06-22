@@ -92,6 +92,7 @@
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "feather-icons": "^4.29.2",
+    "gbv-login-client-vue": "^1.0.0",
     "jskos-vue": "^0.3.18",
     "jsonschema": "^1.5.0",
     "morgan": "^1.10.0",
