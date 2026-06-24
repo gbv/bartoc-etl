@@ -1,0 +1,19 @@
+[
+  {
+    "id": "doc:aat-exact-abbreviation",
+    "title_en": "Art & Architecture Thesaurus",
+    "title_sort": "Art & Architecture Thesaurus",
+    "pref_labels_ss": ["Art & Architecture Thesaurus"],
+    "alt_labels_ss": ["AAT"],
+    "notation_ss": ["AAT"],
+    "fullrecord": "{\"uri\":\"doc:aat-exact-abbreviation\",\"prefLabel\":{\"en\":\"Art & Architecture Thesaurus\"},\"altLabel\":{\"und\":[\"AAT\"]},\"notation\":[\"AAT\"]}"
+  },
+  {
+    "id": "doc:aat-title-only",
+    "title_en": "AAT Background Notes",
+    "title_sort": "AAT Background Notes",
+    "pref_labels_ss": ["AAT Background Notes"],
+    "definition_ss": ["AAT overview material that mentions AAT several times."],
+    "fullrecord": "{\"uri\":\"doc:aat-title-only\",\"prefLabel\":{\"en\":\"AAT Background Notes\"}}"
+  }
+]

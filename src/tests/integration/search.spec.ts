@@ -7,6 +7,7 @@ let app: any;
 let seededDocs: any[];
 const FIXTURE = "src/tests/fixtures/solr/seed.json";
 const DDC_FIXTURE = "src/tests/fixtures/solr/ddc-seed.json";
+const ABBREVIATION_FIXTURE = "src/tests/fixtures/solr/abbreviation-ranking.json";
 
 const getIds = (res: any) =>
   (res.body.response?.docs ?? []).map((d: any) => d.id).sort();
@@ -20,6 +21,9 @@ beforeAll(async () => {
 
   const ddcDocs = await seedSolrFromJson(DDC_FIXTURE);
   seededDocs = [...seededDocs, ...ddcDocs];
+
+  const abbreviationDocs = await seedSolrFromJson(ABBREVIATION_FIXTURE);
+  seededDocs = [...seededDocs, ...abbreviationDocs];
 
   const { createApp } = await import("../../server/main");
   app = await createApp({ withVite:false, withFrontend:false, withWorkers:false, withUpdater:false });
@@ -159,6 +163,23 @@ describe("GET /api/search", () => {
 
     expect(res.status).toBe(200)
     expect(getIds(res)).toEqual(["doc:bk-42-90"])
+  })
+
+  it("ranks exact abbreviation matches above title-only matches", async () => {
+    const res = await request(app)
+      .get("/api/search")
+      .query({
+        search: "AAT",
+        limit: 5,
+        sort: "relevance",
+        order: "desc",
+      })
+
+    expect(res.status).toBe(200)
+
+    const ids = (res.body.response?.docs ?? []).map((d: any) => d.id)
+    expect(ids).toContain("doc:aat-title-only")
+    expect(ids[0]).toBe("doc:aat-exact-abbreviation")
   })
 
   // Legacy query params (languages, subject, etc.) are now normalized
@@ -375,5 +396,4 @@ describe("GET /api/search – fuzzy/trigram integration", () => {
     expect(res.status).toBe(200);
   });
 });
-
 

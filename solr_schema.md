@@ -132,6 +132,16 @@ A multi-valued text field that aggregates most human-readable content for global
 - title_search
 A dedicated text field optimized for title-only searches.
 
+### Exact abbreviation boost
+
+For global search (`allfields`), exact matches in `notation_ss` and
+`alt_labels_ss` get an extra boost. This helps short names and abbreviations,
+for example `AAT`, rank above records where the same text only appears in a
+longer title or description.
+
+This boost is not used for field-specific searches such as `title_search` or
+`subject_notation`.
+
 
 ### Fuzzy search via character trigrams (baseline)
 

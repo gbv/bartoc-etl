@@ -97,12 +97,26 @@ function escapeForLocalParamValue(s: string): string {
   return s.replace(/([\\"])/g, "\\$1");
 }
 
+// Abbreviation boosts should affect the global search only. Field-specific
+// searches such as title_search or subject_notation must keep their scope.
+function wantsGlobalSearch(baseField: string): boolean {
+  return /^allfields$/i.test((baseField ?? "").trim());
+}
+
+// Build a Solr local-param field query and reuse the existing escaping rules
+// for values embedded inside the quoted query string.
+function exactFieldQuery(field: string, value: string, boost: number): string {
+  return `_query_:"{!field f=${field}}${escapeForLocalParamValue(value)}"^${boost}`;
+}
+
 /**
  * Builds a final Lucene query by OR-ing a typo-tolerant trigram fallback
  * onto an existing base query.
  *
  * Behavior
  * - Always keep `baseLucene` unchanged (exact matches rank highest).
+ * - For global searches, boost exact matches in compact identifier-like
+ *   fields such as `notation_ss` and `alt_labels_ss`.
  * - If `userQuery` is simple (no quotes/operators, length ≥ 3), add:
  *     title_trigram:<q>^0.6
  *   and, unless `baseField` is title-only, also:
@@ -142,6 +156,16 @@ export function buildLuceneWithTrigrams(opts: {
 
   // Always keep base query intact (exact/phrase matches get priority).
   parts.push(`(${baseLucene})`);
+
+  // Short labels and notations often act as abbreviations (e.g. "AAT").
+  // Give exact matches there enough weight to beat incidental text matches.
+  if (simple && wantsGlobalSearch(baseField)) {
+    const val = (userQuery ?? "").trim();
+    parts.push(`(${[
+      exactFieldQuery("notation_ss", val, 12),
+      exactFieldQuery("alt_labels_ss", val, 12),
+    ].join(" OR ")})`);
+  }
 
   // Add safe trigram fallback for simple queries
   if (simple) {
