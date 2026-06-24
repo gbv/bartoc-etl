@@ -1,0 +1,41 @@
+[
+  {
+    "uri": "http://bartoc.org/api-type/sparql",
+    "notation": ["sparql"],
+    "inScheme": [
+      {
+        "uri": "http://bartoc.org/en/node/20002"
+      }
+    ],
+    "prefLabel": {
+      "en": "SPARQL endpoint"
+    },
+    "topConceptOf": [
+      {
+        "uri": "http://bartoc.org/en/node/20002"
+      }
+    ],
+    "@context": "https://gbv.github.io/jskos/context.json",
+    "type": ["http://www.w3.org/2004/02/skos/core#Concept"]
+  },
+  {
+    "uri": "http://bartoc.org/api-type/mesh",
+    "notation": ["mesh"],
+    "inScheme": [
+      {
+        "uri": "http://bartoc.org/en/node/20002"
+      }
+    ],
+    "prefLabel": {
+      "en": "MeSH SPARQL"
+    },
+    "broader": [
+      {
+        "uri": "http://bartoc.org/api-type/sparql",
+        "notation": ["sparql"]
+      }
+    ],
+    "@context": "https://gbv.github.io/jskos/context.json",
+    "type": ["http://www.w3.org/2004/02/skos/core#Concept"]
+  }
+]

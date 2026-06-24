@@ -51,7 +51,8 @@ const SOURCES: Record<Source["key"], Source> = {
   },
   apiTypes: {
     key: "apiTypes",
-    url: `${BARTOC_API}/voc/top?uri=http://bartoc.org/en/node/20002`,
+    // API types are a small vocabulary; use a high limit to include non-top concepts.
+    url: `${BARTOC_API}/voc/concepts?uri=http://bartoc.org/en/node/20002&limit=500`,
     kind: "json",
     snapDir: path.join(DATA_DIR, "snapshots", "apiTypes"),
     metaPath: path.join(DATA_DIR, "artifacts", "apiTypes.last.json"),

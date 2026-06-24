@@ -16,10 +16,6 @@ export async function loadApiTypesConcepts(filePath: string): Promise<ConceptDoc
   return data as ConceptDocument[];
 }
 
-/**
- * Load (and cache) DDC labels from an NDJSON dump.
- * @param ndjsonPath - Path to NDJSON file.
- */
 export async function buildBartocApiLabels(
   snapshotPath: string, outDir: string
 ): Promise<ApiTypeLabelsMap> {
@@ -39,5 +35,4 @@ export async function buildBartocApiLabels(
 
   return map;
 }
-
 
