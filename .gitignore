@@ -15,6 +15,7 @@ dist/
 # Temporary files
 tmp/
 temp/
+docs/
 
 # Logs
 logs/
