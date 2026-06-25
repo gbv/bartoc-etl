@@ -285,7 +285,7 @@ describe("GET /api/search — DDC routing via filter=ddc:", () => {
 
 // --- Fuzzy / trigram integration
 describe("GET /api/search – fuzzy/trigram integration", () => {
-  it('typo "Clasification" still finds the “Classification” results (title_search)', async () => {
+  it('keeps typo "Clasification" strict for title_search', async () => {
     const limit = 25;
 
     // Baseline: correctly spelled
@@ -300,18 +300,7 @@ describe("GET /api/search – fuzzy/trigram integration", () => {
       });
 
     expect(good.status).toBe(200);
-    const goodIds = new Set(getIds(good));
-
-    // If your seed set doesn’t contain any “Classification” titles,
-    // don’t fail the whole suite — just skip this assertion gracefully.
-    if (goodIds.size === 0) {
-      // eslint-disable-next-line no-console
-      console.warn(
-        '[fuzzy-test] No baseline results for "Classification" in seed; ' +
-        "skipping fuzzy overlap assertion."
-      );
-      return;
-    }
+    expect(good.body.response?.numFound ?? 0).toBeGreaterThan(0);
 
     // Typo: drop one 's' -> "Clasification"
     const typo = await request(app)
@@ -325,12 +314,7 @@ describe("GET /api/search – fuzzy/trigram integration", () => {
       });
 
     expect(typo.status).toBe(200);
-    const typoIds = new Set(getIds(typo));
-    expect(typoIds.size).toBeGreaterThan(0); // should recover at least something
-
-    // Require some overlap with the correct spelling’s results.
-    const overlap = [...goodIds].filter(id => typoIds.has(id)).length;
-    expect(overlap).toBeGreaterThan(0);
+    expect(typo.body.response?.numFound ?? 0).toBe(0);
 
   });
 
@@ -388,6 +372,24 @@ describe("GET /api/search – fuzzy/trigram integration", () => {
     }
   });
 
+  it("does not return noisy trigram results for nonsense global query", async () => {
+    const res = await request(app)
+      .get("/api/search")
+      .query({ search: "sasdfdd", field: "allfields", limit: 10 });
+
+    expect(res.status).toBe(200);
+    expect(res.body.response?.numFound ?? 0).toBe(0);
+  });
+
+  it("treats empty field parameter as allfields", async () => {
+    const res = await request(app)
+      .get("/api/search")
+      .query({ search: "sasdfdd", field: "", limit: 10 });
+
+    expect(res.status).toBe(200);
+    expect(res.body.response?.numFound ?? 0).toBe(0);
+  });
+
   // Advanced syntax should *not* route to trigram (we just assert it doesn't crash)
   it("advanced Lucene-ish query does not crash (trigram skipped)", async () => {
     const res = await request(app)
@@ -396,4 +398,3 @@ describe("GET /api/search – fuzzy/trigram integration", () => {
     expect(res.status).toBe(200);
   });
 });
-

@@ -9,8 +9,17 @@ it("adds trigram fallback for simple multi-word query", () => {
   });
   expect(out.q).toMatch(/_query_:"\{!field f=notation_ss\}clasification system"\^12/);
   expect(out.q).toMatch(/_query_:"\{!field f=alt_labels_ss\}clasification system"\^12/);
-  expect(out.q).toMatch(/_query_:"\{!field f=title_trigram\}clasification system"\^0\.6/);
-  expect(out.q).toMatch(/_query_:"\{!field f=allfields_trigram\}clasification system"\^0\.25/);
+  expect(out.q).toMatch(/_query_:"\{!edismax qf=title_trigram mm=50%\}cla las asi sif ifi fic ica cat ati tio ion sys yst ste tem"\^0\.6/);
+  expect(out.q).toMatch(/_query_:"\{!edismax qf=allfields_trigram mm=50%\}cla las asi sif ifi fic ica cat ati tio ion sys yst ste tem"\^0\.25/);
+});
+
+it("passes generated trigrams to the fuzzy fallback", () => {
+  const out = buildLuceneWithTrigrams({
+    userQuery: "sasdfdd",
+    baseField: "allfields",
+    baseLucene: '(allfields:("sasdfdd"^3))'
+  });
+  expect(out.q).toMatch(/_query_:"\{!edismax qf=title_trigram mm=50%\}sas asd sdf dfd fdd"\^0\.6/);
 });
 
 it("boosts exact abbreviation fields for global search", () => {
@@ -31,6 +40,16 @@ it("does not add abbreviation boosts to title-only search", () => {
   });
   expect(out.q).not.toMatch(/notation_ss/);
   expect(out.q).not.toMatch(/alt_labels_ss/);
+  expect(out.q).not.toMatch(/trigram/);
+});
+
+it("does not add trigram fallback to field-specific search", () => {
+  const out = buildLuceneWithTrigrams({
+    userQuery: "Clasification",
+    baseField: "title_search",
+    baseLucene: '(title_search:("Clasification"^3))'
+  });
+  expect(out.q).toBe('(title_search:("Clasification"^3))');
 });
 
 it("skips trigram for advanced query", () => {

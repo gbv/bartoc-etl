@@ -21,6 +21,7 @@ import { SearchFilter } from "./solr/search/SearchFilter.js";
 import { runUpdateOnce } from "./utils/updateFromBartoc";
 import fsPromises from "node:fs/promises";
 import { parseRepeatableFilters } from "./utils/filters.ts";
+import { buildLuceneWithTrigrams } from "./utils/helpers.ts";
 
 // Default for workers in the queue processing system with Redis:
 //  - test → OFF
@@ -168,6 +169,8 @@ export async function createApp(opts?: {
       order = SortOrder.ASC,
       format = "",
     } = req.query as Partial<SearchParams>;
+    const searchText = String(search ?? "");
+    const searchField = String(field ?? "").trim() || "allfields";
 
     // Building the query
     // 1) Build the *base* Lucene query from the user text.
@@ -175,16 +178,15 @@ export async function createApp(opts?: {
     //    - `field`: which field to search in (e.g. "allfields", "title_search")
     //    - The numbers (3, 2) are weights/params used by your builder (e.g. phrase vs. terms).
     //    - keeping the operator as OR to allow partial matches across tokens.
-    const base = LuceneQuery.fromText(search, field, 3, 2).operator("OR");
+    const base = LuceneQuery.fromText(searchText, searchField, 3, 2).operator("OR");
 
     // Convert to a final Lucene string for Solr.
     const baseLucene = base.toString();
 
     // 2) Compose the base query with *trigram* fields (fuzzy char n-grams)
-    const { buildLuceneWithTrigrams } = await import("./utils/helpers.ts"); // adjust path
     const { q, defType } = buildLuceneWithTrigrams({
-      userQuery: String(search ?? ""),
-      baseField: String(field ?? "allfields"),
+      userQuery: searchText,
+      baseField: searchField,
       baseLucene,
     });
 

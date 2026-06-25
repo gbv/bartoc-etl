@@ -145,7 +145,9 @@ This boost is not used for field-specific searches such as `title_search` or
 
 ### Fuzzy search via character trigrams (baseline)
 
-A small, safe way to make search resilient to typos. We add two trigram fields in Solr and a tiny bit of query glue on the server. Exact matches still win; trigrams are a soft fallback so users don’t get zero results for small mistakes.
+A small, safe way to make global search resilient to typos. We add two trigram fields in Solr and a tiny bit of query glue on the server. Exact matches still win; trigrams are a soft fallback so users don’t get zero results for small mistakes.
+
+Trigram fallback is used only for global search (`allfields`). Field-specific searches such as `title_search` and `subject_notation` stay strict.
 
 #### Why trigrams?
 
@@ -183,24 +185,32 @@ A dedicated **text_trigram** that lowercases, ASCII‑folds, and splits into 3�
 ```
 ( allfields:("British Columbia First Nations Subject Headings"^3 OR "British" OR "Columbia" OR "First" OR "Nations" OR "Subject" OR "Headings") )
 OR
-( _query_:"{!field f=title_trigram}British Columbia First Nations Subject Headings"^0.6
-  OR _query_:"{!field f=allfields_trigram}British Columbia First Nations Subject Headings"^0.25 )
+( _query_:"{!edismax qf=title_trigram mm=50%}bri rit iti tis ish col olu lum umb mbi bia fir irs rst ..."^0.6
+  OR _query_:"{!edismax qf=allfields_trigram mm=50%}bri rit iti tis ish col olu lum umb mbi bia fir irs rst ..."^0.25 )
 ```
 
 - The first part is the exact/token query (unchanged).
-- The second part kicks in only for simple inputs and lets the analyzer expand to trigrams safely via `{!field f=…}` local parameters.
+- The server sends generated 3-character grams to the trigram fields.
+- The second part kicks in only for simple inputs. It uses eDisMax with `mm=50%`
+  so documents must share a meaningful part of these grams.
 
 
-**Enabled** for: typos and simple text, e.g.  
+**Enabled** for: typos and simple text in global search, e.g.  
 `Clasification`, `italain`, `deutsch land` (length ≥ 3, no Lucene syntax).
 
 **Disabled** for: power-user cases, e.g.  
 `title:"film noir"`, `api:*`, `foo AND bar`, `type:thesaurus`, or very short inputs like `it`.
 
+**Also disabled** for field-specific searches, e.g. `field=title_search`.
+
 #### Tuning notes
 
 - Start with boosts `title_trigram^0.6`, `allfields_trigram^0.25`.
   - Raise/lower as needed to balance recall vs. noise.
+- Keep `mm=50%` strict enough to avoid random-string matches, but loose enough
+  for common typos.
+- Generate trigram query text in the server before calling eDisMax. Passing the
+  whole word can make Solr match one noisy gram only.
 - If index size grows too much, keep only `title_trigram` (remove `allfields_trigram` & copyField).
 - Keep min/max gram size at **3** to avoid churn and false positives.
 

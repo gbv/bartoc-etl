@@ -65,6 +65,12 @@ export async function fileSize(p: string) {
  */
 const ADVANCED_CHARS = /[+\-!(){}[\]^"~*?:\\]|(?:\bAND\b|\bOR\b|\bNOT\b)/i;
 
+// Tuning knobs for the fuzzy fallback. Keep them together so changing the
+// recall/noise balance does not require spelunking through query strings.
+const TRIGRAM_MM = "50%";
+const TITLE_TRIGRAM_BOOST = 0.6;
+const ALLFIELDS_TRIGRAM_BOOST = 0.25;
+const EXACT_ABBREVIATION_BOOST = 12;
 
 /**
  * Decide whether a user query is “simple” (benefits from trigram fallback)
@@ -110,6 +116,51 @@ function exactFieldQuery(field: string, value: string, boost: number): string {
 }
 
 /**
+ * Convert user text into the same kind of 3-character slices that Solr stores
+ * in the trigram fields.
+ *
+ * Important for issue #127:
+ * - Sending the whole word to the trigram field let Solr's analyzer split it
+ *   internally, but `mm=50%` could still behave too loosely for nonsense input.
+ * - Sending explicit grams gives eDisMax a real list of required-overlap terms.
+ *
+ * Example:
+ *   "Austrailan" -> "aus ust str tra rai ail ila lan"
+ */
+function buildTrigramQueryText(value: string): string {
+  // Match the Solr field analyzer: fold accents, lowercase, and split on
+  // non-letter/non-number boundaries so punctuation does not create grams.
+  const folded = (value ?? "")
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+
+  // De-duplicate grams to avoid accidentally overweighting repeated character
+  // sequences such as "aaaaa" -> "aaa aaa aaa".
+  const grams = new Set<string>();
+
+  for (const token of folded.split(/[^\p{L}\p{N}]+/u)) {
+    // Array.from keeps Unicode code points together better than string indexing.
+    const chars = Array.from(token);
+    for (let i = 0; i <= chars.length - 3; i += 1) {
+      grams.add(chars.slice(i, i + 3).join(""));
+    }
+  }
+
+  return [...grams].join(" ");
+}
+
+// Use eDisMax for trigram fallback so we can require a meaningful overlap
+// between generated trigrams instead of matching one noisy 3-character slice.
+function trigramFieldQuery(field: string, value: string, boost: number): string | null {
+  const queryText = buildTrigramQueryText(value);
+  // Values shorter than 3 characters produce no grams, so they should not add
+  // an empty fallback clause.
+  if (!queryText) return null;
+  return `_query_:"{!edismax qf=${field} mm=${TRIGRAM_MM}}${escapeForLocalParamValue(queryText)}"^${boost}`;
+}
+
+/**
  * Builds a final Lucene query by OR-ing a typo-tolerant trigram fallback
  * onto an existing base query.
  *
@@ -117,10 +168,11 @@ function exactFieldQuery(field: string, value: string, boost: number): string {
  * - Always keep `baseLucene` unchanged (exact matches rank highest).
  * - For global searches, boost exact matches in compact identifier-like
  *   fields such as `notation_ss` and `alt_labels_ss`.
- * - If `userQuery` is simple (no quotes/operators, length ≥ 3), add:
- *     title_trigram:<q>^0.6
- *   and, unless `baseField` is title-only, also:
- *     allfields_trigram:<q>^0.25
+ * - For global simple queries (no quotes/operators, length ≥ 3), add generated
+ *   3-character grams to:
+ *     title_trigram:<grams>^0.6
+ *   and:
+ *     allfields_trigram:<grams>^0.25
  * - Returns `{ q, defType: "lucene" }`.
  *
  * Inputs
@@ -135,8 +187,8 @@ function exactFieldQuery(field: string, value: string, boost: number): string {
  *   baseField: "allfields",
  *   baseLucene: '(allfields:("Clasification"^3 OR "Clasification"))'
  * })
- * // → '(allfields:(...)) OR (_query_:"{!field f=title_trigram}Clasification"^0.6
- * //     OR _query_:"{!field f=allfields_trigram}Clasification"^0.25)'
+ * // → '(allfields:(...)) OR (_query_:"{!edismax qf=title_trigram mm=50%}cla las ..."^0.6
+ * //     OR _query_:"{!edismax qf=allfields_trigram mm=50%}cla las ..."^0.25)'
  */
 export function buildLuceneWithTrigrams(opts: {
   userQuery: string;
@@ -151,38 +203,44 @@ export function buildLuceneWithTrigrams(opts: {
     includeAllfieldsTrigrams = true,
   } = opts;
 
-  const simple = isSimpleUserQuery(userQuery);
-  const parts: string[] = [];
+  const value = (userQuery ?? "").trim();
+
+  // This is the core safety gate:
+  // - global search may use typo-tolerant fallback;
+  // - field-specific search stays strict;
+  // - advanced Lucene-like syntax is left untouched.
+  const useGlobalFallback = isSimpleUserQuery(value) && wantsGlobalSearch(baseField);
+
+  if (!useGlobalFallback) {
+    // Returning the base query unchanged keeps field-specific and advanced
+    // searches predictable, and avoids decorative parentheses in tests/logs.
+    return { q: baseLucene, defType: "lucene" };
+  }
 
   // Always keep base query intact (exact/phrase matches get priority).
-  parts.push(`(${baseLucene})`);
+  const parts: string[] = [`(${baseLucene})`];
 
   // Short labels and notations often act as abbreviations (e.g. "AAT").
   // Give exact matches there enough weight to beat incidental text matches.
-  if (simple && wantsGlobalSearch(baseField)) {
-    const val = (userQuery ?? "").trim();
-    parts.push(`(${[
-      exactFieldQuery("notation_ss", val, 12),
-      exactFieldQuery("alt_labels_ss", val, 12),
-    ].join(" OR ")})`);
+  parts.push(`(${[
+    exactFieldQuery("notation_ss", value, EXACT_ABBREVIATION_BOOST),
+    exactFieldQuery("alt_labels_ss", value, EXACT_ABBREVIATION_BOOST),
+  ].join(" OR ")})`);
+
+  const trigramBits: string[] = [];
+  // Prefer the title trigram a bit so title matches float higher than a fuzzy
+  // match buried somewhere else in the copied allfields text.
+  const titleTrigram = trigramFieldQuery("title_trigram", value, TITLE_TRIGRAM_BOOST);
+  if (titleTrigram) trigramBits.push(titleTrigram);
+
+  // allfields_trigram is useful for recall, but low-boosted because it can
+  // match many copied fields and should not outrank cleaner title matches.
+  if (includeAllfieldsTrigrams) {
+    const allfieldsTrigram = trigramFieldQuery("allfields_trigram", value, ALLFIELDS_TRIGRAM_BOOST);
+    if (allfieldsTrigram) trigramBits.push(allfieldsTrigram);
   }
 
-  // Add safe trigram fallback for simple queries
-  if (simple) {
-    const val = escapeForLocalParamValue((userQuery ?? "").trim());
-
-    const trigramBits: string[] = [];
-     // Prefer the title trigram a bit so title matches float higher.
-    trigramBits.push(`_query_:"{!field f=title_trigram}${val}"^0.6`);
-
-    // Only add allfields_trigram when the base field isn’t title-only.
-    // (Heuristic: treat fields starting with "title" as title-only.)
-    const wantTitleOnly = /^title(_search|_.*)?$/i.test(baseField);
-    if (!wantTitleOnly && includeAllfieldsTrigrams) {
-      trigramBits.push(`_query_:"{!field f=allfields_trigram}${val}"^0.25`);
-    }
-    
-    // OR the trigram clause with the base query.
+  if (trigramBits.length) {
     parts.push(`(${trigramBits.join(" OR ")})`);
   }
 
