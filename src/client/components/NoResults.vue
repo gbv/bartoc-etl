@@ -18,6 +18,12 @@
         <li v-if="term">
           Use broader terms (e.g., “film” instead of “documentary”).
         </li>
+        <li v-if="term">
+          <a
+            href="javascript:false;"
+            @click="emit('clear-search')">Clear search term</a>
+          <span v-if="hasFilters"> and keep the active filters</span>.
+        </li>
         <li v-if="hasFilters">
           <a
             href="javascript:false;"
@@ -37,7 +43,7 @@ const props = defineProps({
   activeFilters: { type: Object, default: () => ({}) },
 })
 
-const emit = defineEmits(["clear-filters"])
+const emit = defineEmits(["clear-filters", "clear-search"])
 
 const term = computed(() => (props.search || "").trim())
 const activeCount = computed(

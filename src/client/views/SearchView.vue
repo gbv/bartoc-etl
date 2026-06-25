@@ -43,6 +43,7 @@ facets down * into SearchResults and SearchSidebar components. */
         v-else
         :search="route.query.search || ''"
         :active-filters="activeFilters"
+        @clear-search="onClearSearch"
         @clear-filters="onClearFilters" />
     </div>
     <aside class="search-sidebar__area noprint">
@@ -82,6 +83,7 @@ import {
   normalizeLegacyQueryFromRoute,
 } from "../utils/legacy.js"
 import { normalizeSort } from "../utils/sortDefaults.js"
+import { buildSearchBarQuery } from "../utils/searchQuery.js"
 import { appendQueryToParams } from "../utils/utils.js"
 
 // Router hooks
@@ -239,27 +241,17 @@ async function fetchResults(query, opts = {}) {
   }
 }
 
-// Run search from the bar; preserve current URL's sort/order and ignore the very first auto-fire
+// Run search from the bar; preserve current URL's sort/order and active filters.
 function onSearch(query) {
   if (!booted.value) {
     return
   }
   limit.value = pageSize
   resetFiltersRequested()
-  clearFilters()
-  resetOpenGroups()
+  clearAllBuckets()
 
-  const base = { ...route.query }
-
-  delete base.filter
-  delete base.start
-
-  const newQuery = {
-    ...base,
-    search: query?.search ?? base.search ?? "",
-    field: query?.field ?? "",
-    limit: String(limit.value),
-  }
+  const filterParams = buildRepeatableFiltersFromState()
+  const newQuery = buildSearchBarQuery(route.query, query, filterParams, limit.value)
 
   fetchResults(newQuery)
 }
@@ -384,6 +376,29 @@ function onClearFilters() {
 
   router.push({ name: "search", query: newQuery })
 
+  fetchResults(newQuery)
+}
+
+// Clear only the search term (keep current filters/sort/order)
+function onClearSearch() {
+  limit.value = pageSize
+  lookupUri.value = undefined
+
+  const filterParams = buildRepeatableFiltersFromState()
+
+  const base = { ...route.query }
+  delete base.search
+  delete base.field
+  delete base.filter
+  delete base.start
+
+  const newQuery = {
+    ...base,
+    limit: String(pageSize),
+    ...(filterParams.length ? { filter: filterParams } : {}),
+  }
+
+  router.push({ name: "search", query: newQuery })
   fetchResults(newQuery)
 }
 
