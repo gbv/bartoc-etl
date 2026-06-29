@@ -11,6 +11,7 @@ import { buildAccessType } from "./buildAccessType";
 import { buildDDCLabels } from "./buildDDCLabels";
 import { buildListedInLabels } from "./buildListedInLabels";
 import { buildBartocApiLabels } from "./buildBartocApiLabels";
+import { buildNkosTypeDefinitions } from "./buildNkosTypeDefinitions";
 import { KEEP_LANGS } from "./helpers";
 import { runJskosEnrich } from "./runJskosEnrich";
 import { spawn } from "node:child_process";
@@ -19,12 +20,18 @@ import config from "../conf/conf.ts";
 const { DATA_DIR, ARTIFACTS, BARTOC_BASE, BARTOC_API, BARTOC_DUMP } = config;
 const DO_REINDEX = process.env.REINDEX === "1";
 const forceEnrich = process.env.FORCE_ENRICH === "1";
-
+const NKOS_TYPES_URL = process.env.NKOS_TYPES_URL ?? "https://api.dante.gbv.de/voc/nkostype/top";
 const META_PATH = path.join(ARTIFACTS, "vocs.last.json"); // metadata persisted between runs
 const ENRICH_OUT_NAME = "vocs.enriched.ndjson";
 
 type Source = {
-  key: "vocs" | "registries" | "apiTypes" | "accessTypes" | "ddcConcepts";
+  key:
+    | "vocs"
+    | "registries"
+    | "apiTypes"
+    | "accessTypes"
+    | "ddcConcepts"
+    | "nkosTypes";
   url: string;
   kind: "ndjson" | "json";
   snapDir: string;
@@ -73,7 +80,15 @@ const SOURCES: Record<Source["key"], Source> = {
     snapDir: path.join(DATA_DIR, "snapshots", "ddcConcepts"),
     metaPath: path.join(DATA_DIR, "artifacts", "ddcConcepts.last.json"),
     ext: ".json",
-  }
+  },
+  nkosTypes: {
+    key: "nkosTypes",
+    url: NKOS_TYPES_URL,
+    kind: "json",
+    snapDir: path.join(DATA_DIR, "snapshots", "nkosTypes"),
+    metaPath: path.join(DATA_DIR, "artifacts", "nkosTypes.last.json"),
+    ext: ".json",
+  },
 };
 
 /** Metadata persisted to support conditional requests on the next run */
@@ -317,16 +332,20 @@ export async function selectVocsInput({
 async function main(): Promise<void> {
 
   // fetch both sources (independently tracked)
-  const [{ meta: vocsMeta, notModified: notModifiedVocs }, 
+  const [
+    { meta: vocsMeta, notModified: notModifiedVocs },
     { meta: regMeta, notModified: notModifiedRegs },
-    { meta: apiTypesMeta, notModified: notModifiedApitypes}, 
-    { meta: accessTypesMeta, notModified: notModifiedAccesstypes},
-    { meta: ddcConceptsMeta, notModified: notModifiedDdcConcepts}, ] = await Promise.all([
+    { meta: apiTypesMeta, notModified: notModifiedApitypes },
+    { meta: accessTypesMeta, notModified: notModifiedAccesstypes },
+    { meta: ddcConceptsMeta, notModified: notModifiedDdcConcepts },
+    { meta: nkosTypesMeta, notModified: notModifiedNkosTypes },
+  ] = await Promise.all([
     timed("Fetching vocs", () => fetchSnapshotFor(SOURCES.vocs)),
     timed("Fetching registries", () => fetchSnapshotFor(SOURCES.registries)),
     timed("Fetching api types", () => fetchSnapshotFor(SOURCES.apiTypes)),
     timed("Fetching access types", () => fetchSnapshotFor(SOURCES.accessTypes)),
     timed("Fetching DDC 100 Concepts", () => fetchSnapshotFor(SOURCES.ddcConcepts)),
+    timed("Fetching NKOS type concepts", () => fetchSnapshotFor(SOURCES.nkosTypes)),
   ]);
 
   const parts: string[] = [];
@@ -345,6 +364,9 @@ async function main(): Promise<void> {
   if (ddcConceptsMeta?.snapshotPath) parts.push(
     path.basename(ddcConceptsMeta.snapshotPath, 
     path.extname(ddcConceptsMeta.snapshotPath)));
+  if (nkosTypesMeta?.snapshotPath) parts.push(
+    path.basename(nkosTypesMeta.snapshotPath,
+    path.extname(nkosTypesMeta.snapshotPath)));
 
   const versionName = parts.join("__") // e.g. 2025-08-28_W-7779d9__2025-08-28_regX
     .replace(/[^A-Za-z0-9._-]+/g, "-") // sanitize
@@ -381,13 +403,18 @@ async function main(): Promise<void> {
   );
 
   // Build listed_in.json labels in streaming mode
-   await timed("Build listed_in.json", () =>
+  await timed("Build listed_in.json", () =>
     buildListedInLabels(regMeta.snapshotPath, tempDir)
   );
 
-  // Build listed_in.json labels in streaming mode
-   await timed("Build bartoc-api-types-labels.json", () =>
+  // Build bartoc-api-types-labels.json labels
+  await timed("Build bartoc-api-types-labels.json", () =>
     buildBartocApiLabels(apiTypesMeta.snapshotPath, tempDir)
+  );
+
+  const nkosTypeDefinitions = await timed(
+    "Build nkos-type-definitions.json",
+    () => buildNkosTypeDefinitions(nkosTypesMeta.snapshotPath, tempDir),
   );
 
   // EARLY EXIT: snapshot unchanged and artifacts already published → do nothing
@@ -411,18 +438,25 @@ async function main(): Promise<void> {
     console.log("DDC 100 concepts Snapshot unchanged — nothing to do.");
   }
 
-	const files: string[] = [
+  if (notModifiedNkosTypes) {
+    console.log(
+      "NKOS type concepts Snapshot unchanged — reused cached snapshot.",
+    );
+  }
+
+  const files: string[] = [
     "lookup_entries.json",
     "access_type.json",
     "ddc-labels.json",
     "listed_in.json",
     "bartoc-api-types-labels.json",
+    "nkos-type-definitions.json",
   ];
 
-	// If enrichment succeeded, record the enriched file in the manifest list
-	if (enrichMeta.used && enrichMeta.file) {
-		files.unshift(enrichMeta.file); // put it first for visibility
-	}
+  // If enrichment succeeded, record the enriched file in the manifest list
+  if (enrichMeta.used && enrichMeta.file) {
+    files.unshift(enrichMeta.file); // put it first for visibility
+  }
 	
   // Write artifact metadata (useful for healthchecks and debugging)
   const artifactsMeta = {
@@ -431,12 +465,25 @@ async function main(): Promise<void> {
     sources: {
       vocs: { url: SOURCES.vocs.url, ...vocsMeta },
       registries: { url: SOURCES.registries.url, ...regMeta },
+      apiTypes: { url: SOURCES.apiTypes.url, ...apiTypesMeta },
+      accessTypes: { url: SOURCES.accessTypes.url, ...accessTypesMeta },
+      ddcConcepts: { url: SOURCES.ddcConcepts.url, ...ddcConceptsMeta },
+      nkosTypes: {
+        url: SOURCES.nkosTypes.url,
+        ...nkosTypesMeta,
+        artifact: "nkos-type-definitions.json",
+        count: Object.keys(nkosTypeDefinitions).length,
+      },
     },
-		enriched: enrichMeta,      // <— new: records whether enriched file was used
+    enriched: enrichMeta,      // <— new: records whether enriched file was used
     files, 
   };
   
-	await fs.writeFile(path.join(tempDir, "artifacts.meta.json"), JSON.stringify(artifactsMeta, null, 2), "utf8");
+  await fs.writeFile(
+    path.join(tempDir, "artifacts.meta.json"),
+    JSON.stringify(artifactsMeta, null, 2),
+    "utf8",
+  );
 
   // 5) Atomic publish
   await publishCurrent(tempDir);

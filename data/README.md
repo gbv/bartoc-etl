@@ -9,13 +9,15 @@
 ### Rationale
 
 * Canonical snapshots feed all artifacts.
-* No data in Git—only scripts/docs.
+* Large snapshots and derived artifacts are generated; small static lookup
+  files may be versioned when they are configuration rather than source data.
 * Atomic rename prevents serving **partial files**.
 
 ### Environment variables (optional)
 
 * `BARTOC_DUMP` — default: `https://bartoc.org/data/dumps/latest.ndjson`
 * `DATA_DIR` — default: `data` (root for snapshots/artifacts)
+* `NKOS_TYPES_URL` — default: `https://api.dante.gbv.de/voc/nkostype/top`
 
 
 All files use UTF-8.  
@@ -32,14 +34,15 @@ data/
 │   │   ├── bartoc-api-types-labels.json
 │   │   ├── ddc-labels.json
 │   │   ├── listed_in.json
+│   │   ├── nkos-type-definitions.json
 │   │   └── lookup_entries.json
 │   ├── ddcConcepts.last.json
 │   ├── formats.last.json
+│   ├── nkosTypes.last.json
 │   ├── registries.last.json
 │   └── vocs.last.json
 ├── license-groups.json
 ├── format-groups.json
-├── nkostype.concepts.ndjson
 ├── README.md
 ├── snapshots
 │   ├── accessTypes
@@ -52,6 +55,8 @@ data/
 │   │   ├── 2025-09-01_noetag_025dbe41a62f.json
 │   │   ├── 2025-09-01_noetag_ebf3a904e967.json
 │   │   └── 2025-09-02_noetag_ebf3a904e967.json
+│   ├── nkosTypes
+│   │   └── 2025-09-02_noetag_424df8a58e56.json
 │   ├── registries
 │   │   └── 2025-09-01_W-289a7-o7JZIkS1ruxmbGhHhwmNx8zBspw_6497d5f035b0.json
 │   └── vocs
@@ -88,6 +93,7 @@ data/
    * `ddc-labels.json`
    * `listed_in.json`
    * `bartoc-api-types-labels.json`
+   * `nkos-type-definitions.json`
    * `artifacts.meta.json` (timestamps, keep-langs, source metadata)
 
 4. **Atomic publish**: rename `<version>__tmp` → `artifacts/current/`.
@@ -588,27 +594,36 @@ npm run reindex
 
 ---
 
-#### `nkostype.concepts.ndjson`
+#### `nkos-type-definitions.json`
 
-**Purpose:** NKOS Type Vocabulary as JSKOS Concept (e.g., thesaurus, classification schema, gazetteer).  
-**Format:** NDJSON, one JSKOS Concept per line.  
-**Key fields:** `uri`, `type`, `notation`, `prefLabel`, `altLabel?`, `scopeNote?`, `inScheme`, `topConceptOf?`.  
+**Purpose:** Local lookup for NKOS type labels and tooltip definitions.
+
+**Source:** `https://api.dante.gbv.de/voc/nkostype/top`, downloaded by `npm run update-data` as a JSON snapshot and converted into a compact artifact.
+
+**Format:** JSON object, concept URI → `{ prefLabel, definition?, scopeNote? }`.
+
 **Example:**
 
 ```json
-{"uri":"http://w3id.org/nkos/nkostype#gazetteer",
- "type":["http://www.w3.org/2004/02/skos/core#Concept"],
- "@context":"https://gbv.github.io/jskos/context.json",
- "inScheme":[{"uri":"http://w3id.org/nkos/nkostype",
-              "prefLabel":{"de":"KOS Typ Vokabular","en":"KOS Type Vocabulary"},
-              "type":["http://www.w3.org/2004/02/skos/core#ConceptScheme","http://w3id.org/nkos/nkostype#list"]}],
- "publisher":[{"prefLabel":{"de":"DCMI/NKOS Task Group"}}],
- "notation":["gazetteer"],
- "prefLabel":{"en":"Gazetteer","de":"Gazetteer"},
- "altLabel":{"de":["Ortsverzeichnis","Ortslexikon"]},
- "scopeNote":{"en":["geospatial dictionary of named and typed places"]},
- "topConceptOf":[{"uri":"http://w3id.org/nkos/nkostype"}]}
+{
+  "http://w3id.org/nkos/nkostype#thesaurus": {
+    "prefLabel": {
+      "en": "Thesaurus",
+      "de": "Thesaurus"
+    },
+    "definition": {
+      "en": [
+        "A system of terms with hierarchical, associative, and synonymous relationships."
+      ],
+      "de": [
+        "Ein Begriffssystem mit hierarchischen, assoziativen und synonymen Beziehungen."
+      ]
+    }
+  }
+}
 ```
+
+**Used by:** Search result cards for KOS type labels and tooltips.
 
 ---
 

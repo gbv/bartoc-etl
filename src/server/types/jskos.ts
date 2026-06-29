@@ -124,16 +124,20 @@ export interface ConceptDocument {
     [lang: string]: string[]; // Alternative names
   };
 
+  definition?: {
+    [lang: string]: string[]; // Short explanations / descriptions
+  };
+
   scopeNote?: {
     [lang: string]: string[]; // Explanations / descriptions
   };
 
-  topConceptOf: Array<{
+  topConceptOf?: Array<{
     uri: string;
-    prefLabel: {
+    prefLabel?: {
       [lang: string]: string;
     };
-    type: string[];
+    type?: string[];
   }>;
 }
 
