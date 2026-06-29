@@ -15,9 +15,28 @@
       {{ shortDescription }}
     </p>
     <ul class="result-details">
-      <li v-if="typeLabel.length || doc.languages_ss?.length">
-        <strong v-if="typeLabel.length">
-          {{ typeLabel.join(', ') }}
+      <li v-if="typeItems.length || doc.languages_ss?.length">
+        <strong
+          v-if="typeItems.length"
+          class="kos-type-list">
+          <template
+            v-for="(type, index) in typeItems"
+            :key="type.uri || type.label">
+            <span class="kos-type-list__item">
+              {{ type.label }}
+              <span
+                v-if="type.description"
+                class="kos-type-info"
+                :aria-label="`${type.label}: ${type.description}`"
+                :title="type.description"
+                tabindex="0">
+                <vue-feather
+                  aria-hidden="true"
+                  size="22"
+                  type="info" />
+              </span>
+            </span><span v-if="index < typeItems.length - 1">, </span>
+          </template>
         </strong>
         <span v-if="doc.languages_ss?.length">
           ({{ doc.languages_ss.join(', ') }})
@@ -53,7 +72,13 @@
 
 <script setup lang="js">
 import { SupportedLang } from "../types/lang.js"
-import { computed } from "vue"
+import { computed, onMounted } from "vue"
+import {
+  ensureKosTypeDefinitions,
+  getKosTypeDescription,
+  getKosTypeLabel,
+} from "../constants/kosTypeDefinitions.js"
+import { asStringArray } from "../utils/utils.js"
 const envLabel = computed(() => {
   // local development (vite dev server)
   if (import.meta.env.DEV) {
@@ -88,6 +113,10 @@ const props = defineProps({
   sort: { type: String },
 })
 
+onMounted(() => {
+  ensureKosTypeDefinitions()
+})
+
 
 // Helper to safely access dynamic fields on SolrDocument
 /** @type {Object.<string, any>} */
@@ -104,16 +133,43 @@ const description = computed(
     "No description available.",
 )
 
+// Legacy fallback labels already denormalized into the Solr document.
 const typeLabel = computed(() => {
   const key = `type_label_${props.lang ?? "en"}`
-  const val = rawDoc[key]
-  if (Array.isArray(val)) {
-    return val
+  return asStringArray(rawDoc[key])
+})
+
+// Build the display model for KOS types from the canonical URI field.
+//
+// `type_uri` is multivalued: it usually contains the technical SKOS
+// `ConceptScheme` URI plus one or more NKOS type URIs.
+const typeItems = computed(() => {
+  const items = asStringArray(rawDoc.type_uri)
+    .map(uri => {
+      const label = getKosTypeLabel(uri)
+      if (!label) {
+        return null
+      }
+
+      return {
+        uri,
+        label,
+        description: getKosTypeDescription(uri),
+      }
+    })
+    .filter(Boolean)
+
+  // Prefer URI-backed items because they can show the generated NKOS tooltip.
+  if (items.length) {
+    return items
   }
-  if (typeof val === "string") {
-    return [val]
-  }
-  return []
+
+  // Fall back to the old Solr label fields without tooltip metadata.
+  return typeLabel.value.map(label => ({
+    uri: "",
+    label,
+    description: "",
+  }))
 })
 
 // Extract subjects list safely
@@ -225,6 +281,24 @@ const titleHref = computed(() => {
 .result-details li {
   font-size: 0.85rem;
   margin-bottom: 4px;
+}
+
+.kos-type-list__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.kos-type-info {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-text-light-2);
+  cursor: help;
+}
+
+.kos-type-info:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 2px;
 }
 
 .result-metadata {

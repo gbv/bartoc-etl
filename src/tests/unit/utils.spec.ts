@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest"
 // @ts-ignore - JS client utility has no TypeScript declaration
-import { appendQueryToParams, formatDdcFacetLabels } from "../../client/utils/utils"
+import { appendQueryToParams, asStringArray, formatDdcFacetLabels } from "../../client/utils/utils"
 
 describe("appendQueryToParams", () => {
   it("appends scalar values and repeated array values", () => {
@@ -29,6 +29,25 @@ describe("appendQueryToParams", () => {
     expect(params.has("nil")).toBe(false)
     expect(params.has("nope")).toBe(false)
     expect(params.getAll("filter")).toEqual(["language:en"])
+  })
+})
+
+describe("asStringArray", () => {
+  it("normalizes strings and string arrays", () => {
+    expect(asStringArray("Thesaurus")).toEqual(["Thesaurus"])
+    expect(asStringArray(["Thesaurus", "Ontology"])).toEqual([
+      "Thesaurus",
+      "Ontology",
+    ])
+  })
+
+  it("drops non-string values", () => {
+    expect(asStringArray(["Thesaurus", null, 3, "Ontology"])).toEqual([
+      "Thesaurus",
+      "Ontology",
+    ])
+    expect(asStringArray(null)).toEqual([])
+    expect(asStringArray({ label: "Thesaurus" })).toEqual([])
   })
 })
 
