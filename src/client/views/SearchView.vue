@@ -90,6 +90,7 @@ import {
 } from "../utils/searchQuery.js"
 import { appendQueryToParams } from "../utils/utils.js"
 import { SEARCH_MODE, NAVIGATION } from "../constants/search.js"
+import { fetchSearchResults } from "../utils/searchApi.js"
 
 // Router hooks
 const router = useRouter()
@@ -212,36 +213,12 @@ async function fetchResults(query, opts = {}) {
       }
     }
 
-    // 3) build API params (repeatable)
-    const params = new URLSearchParams()
-    Object.entries(base).forEach(([k, v]) => {
-      if (v !== undefined && v !== null && v !== "") {
-        params.set(k, String(v))
-      }
+    const { docs, numFound, facets } = await fetchSearchResults({
+      baseQuery: base,
+      filters: apiFilterList,
+      limit: limit.value,
+      baseUrl: import.meta.env.BASE_URL,
     })
-    params.set("start", "0")
-    params.set("limit", String(limit.value))
-
-    // For the actual API call, use the same effective filters
-    apiFilterList.forEach((f) => params.append("filter", f))
-
-    // 4) fetch
-    const res = await fetch(`${import.meta.env.BASE_URL}api/search?${params}`)
-
-    if (!res.ok) {
-      throw new Error(`Status ${res.status}`)
-    }
-
-    const data = (await res.json()) || {}
-
-    const response = data.response
-    // Ensure docs is always an array of objects
-    const docs = Array.isArray(response?.docs)
-      ? response.docs.filter((doc) => doc && typeof doc === "object")
-      : []
-
-    const numFound = response?.numFound || 0
-    const facets = data?.facets || {}
 
     if (isResultsMode) {
       results.value.docs = docs
