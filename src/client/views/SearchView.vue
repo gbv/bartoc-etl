@@ -57,7 +57,7 @@ facets down * into SearchResults and SearchSidebar components. */
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue"
+import { ref, computed, onMounted, watch } from "vue"
 import { useRouter, useRoute } from "vue-router"
 import SearchBar from "../components/SearchBar.vue"
 import SearchControls from "../components/SearchControls.vue"
@@ -103,6 +103,8 @@ const errorMessage = ref(null)
 const sortBy = ref()
 const lookupUri = ref()
 const booted = ref(false) // useful for ignoring first search event from SearchBar
+// Guards the route watcher while fetchResults intentionally updates the URL.
+let isInternalNavigation = false
 
 
 // download URL for current search (used by SearchControls)
@@ -143,7 +145,8 @@ const sortKey = computed(() => {
 })
 
 async function fetchResults(query, opts = {}) {
-  const mode = opts.mode || "results" // "results" | "facets"
+  const mode = opts.mode || "results" // "results" | "facets" | "append"
+  const navigation = opts.navigation || "replace" // "push" | "replace" | "none"
   const isResultsMode = mode === "results"
   const isAppendMode = mode === "append"
 
@@ -188,7 +191,21 @@ async function fetchResults(query, opts = {}) {
       ...(effectiveUrlFilters.length ? { filter: effectiveUrlFilters } : {}),
     }
 
-    router.replace({ name: route.name, query: urlQuery })
+    // Real search-state changes push history; result expansion replaces it.
+    // Back/Forward uses "none" because the route has already changed.
+    if (navigation !== "none") {
+      const location = { name: route.name || "search", query: urlQuery }
+      isInternalNavigation = true
+      try {
+        if (navigation === "push") {
+          await router.push(location)
+        } else {
+          await router.replace(location)
+        }
+      } finally {
+        isInternalNavigation = false
+      }
+    }
 
     // 3) build API params (repeatable)
     const params = new URLSearchParams()
@@ -241,6 +258,17 @@ async function fetchResults(query, opts = {}) {
   }
 }
 
+// Restore local UI state from the URL on initial load and browser Back/Forward.
+function syncSearchStateFromRoute(query = route.query) {
+  clearAllBuckets()
+  resetFiltersRequested()
+  resetOpenGroups()
+  setFiltersFromRepeatable(query.filter)
+  openGroupsForActiveFilters()
+  limit.value = Number(query.limit) || pageSize
+  sortBy.value = normalizeSort(query).sort
+}
+
 // Run search from the bar; preserve current URL's sort/order and active filters.
 function onSearch(query) {
   if (!booted.value) {
@@ -253,7 +281,7 @@ function onSearch(query) {
   const filterParams = buildRepeatableFiltersFromState()
   const newQuery = buildSearchBarQuery(route.query, query, filterParams, limit.value)
 
-  fetchResults(newQuery)
+  fetchResults(newQuery, { navigation: "push" })
 }
 
 function onSort({ sort, order }, opts = {}) {
@@ -270,8 +298,7 @@ function onSort({ sort, order }, opts = {}) {
     ...(filterParams.length ? { filter: filterParams } : {}),
   }
 
-  router.push({ name: "search", query: newQuery })
-  fetchResults(newQuery)
+  fetchResults(newQuery, { navigation: "push" })
 }
 
 // Load more results by increasing visible results
@@ -280,6 +307,7 @@ function loadMore(opts = {}) {
 
   if (results.value.numFound < newLimit) {
     newLimit = results.value.numFound
+    limit.value = newLimit
   }
 
   const filterParams = buildRepeatableFiltersFromState(opts)
@@ -291,8 +319,7 @@ function loadMore(opts = {}) {
     ...(filterParams.length ? { filter: filterParams } : {}),
   }
 
-  router.push({ path: "/", query: newQuery })
-  fetchResults(newQuery, { mode: "append" })
+  fetchResults(newQuery, { mode: "append", navigation: "replace" })
 }
 
 function showAll(opts = {}) {
@@ -313,8 +340,7 @@ function showAll(opts = {}) {
     ...(filterParams.length ? { filter: filterParams } : {}),
   }
 
-  router.push({ path: "/", query: newQuery })
-  fetchResults(newQuery, { mode: "results" })
+  fetchResults(newQuery, { mode: "results", navigation: "replace" })
 }
 
 // Accepts:
@@ -348,9 +374,9 @@ function onFilterChange(filters, opts = {}) {
   }
 
   if (isBucketOnly) {
-    fetchResults(newQuery, { mode: "facets" })
+    fetchResults(newQuery, { mode: "facets", navigation: "replace" })
   } else {
-    fetchResults(newQuery, { mode: "results" })
+    fetchResults(newQuery, { mode: "results", navigation: "push" })
   }
 }
 
@@ -374,9 +400,7 @@ function onClearFilters() {
     limit: String(pageSize),
   }
 
-  router.push({ name: "search", query: newQuery })
-
-  fetchResults(newQuery)
+  fetchResults(newQuery, { navigation: "push" })
 }
 
 // Clear only the search term (keep current filters/sort/order)
@@ -398,8 +422,7 @@ function onClearSearch() {
     ...(filterParams.length ? { filter: filterParams } : {}),
   }
 
-  router.push({ name: "search", query: newQuery })
-  fetchResults(newQuery)
+  fetchResults(newQuery, { navigation: "push" })
 }
 
 function onRemoveFilter({ field, value }) {
@@ -426,12 +449,27 @@ function onRemoveFilter({ field, value }) {
     ...(filterParams.length ? { filter: filterParams } : {}),
   }
 
-  fetchResults(newQuery)
+  fetchResults(newQuery, { navigation: "push" })
 }
 
 function onInspect(raw) {
   lookupUri.value = !_.isEmpty(raw) ? raw : undefined
 }
+
+// Browser Back/Forward changes the route outside fetchResults.
+// Re-read the URL and fetch without pushing/replacing another entry.
+watch(
+  () => route.fullPath,
+  () => {
+    if (!booted.value || isInternalNavigation) {
+      return
+    }
+
+    syncSearchStateFromRoute(route.query)
+    fetchResults({ ...route.query }, { navigation: "none" })
+  },
+  { flush: "sync" },
+)
 
 // On mount, set filters from URL and do initial search
 onMounted(async () => {
@@ -442,15 +480,10 @@ onMounted(async () => {
   //    - the rest of the app only deals with `filter=...`
   const normalized = await normalizeLegacyQueryFromRoute(route, router) ?? { ...route.query }
 
-  // Initialise filter store from normalized ?filter=... params
-  setFiltersFromRepeatable(normalized.filter)
-  openGroupsForActiveFilters() // auto–open facet groups that have selections
-
-  // Initialise pagination limit from URL or fall back to default page size
-  limit.value = Number(normalized.limit) || pageSize
+  syncSearchStateFromRoute(normalized)
 
   // Fetch initial results based on the normalized query
-  fetchResults({ ...normalized })
+  fetchResults({ ...normalized }, { navigation: "replace" })
 
   // After the first auto-run from SearchBar, ignore extra initial “search” events
   booted.value = true
