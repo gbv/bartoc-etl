@@ -85,6 +85,7 @@ import {
 import { normalizeSort } from "../utils/sortDefaults.js"
 import { buildSearchBarQuery } from "../utils/searchQuery.js"
 import { appendQueryToParams } from "../utils/utils.js"
+import { SEARCH_MODE, NAVIGATION } from "../constants/search.js"
 
 // Router hooks
 const router = useRouter()
@@ -145,10 +146,10 @@ const sortKey = computed(() => {
 })
 
 async function fetchResults(query, opts = {}) {
-  const mode = opts.mode || "results" // "results" | "facets" | "append"
-  const navigation = opts.navigation || "replace" // "push" | "replace" | "none"
-  const isResultsMode = mode === "results"
-  const isAppendMode = mode === "append"
+  const mode = opts.mode || SEARCH_MODE.RESULTS
+  const navigation = opts.navigation || NAVIGATION.REPLACE
+  const isResultsMode = mode === SEARCH_MODE.RESULTS
+  const isAppendMode = mode === SEARCH_MODE.APPEND
 
   const oldLen = isAppendMode ? results.value.docs.length : 0
 
@@ -193,11 +194,11 @@ async function fetchResults(query, opts = {}) {
 
     // Real search-state changes push history; result expansion replaces it.
     // Back/Forward uses "none" because the route has already changed.
-    if (navigation !== "none") {
+    if (navigation !== NAVIGATION.NONE) {
       const location = { name: route.name || "search", query: urlQuery }
       isInternalNavigation = true
       try {
-        if (navigation === "push") {
+        if (navigation === NAVIGATION.PUSH) {
           await router.push(location)
         } else {
           await router.replace(location)
@@ -281,7 +282,7 @@ function onSearch(query) {
   const filterParams = buildRepeatableFiltersFromState()
   const newQuery = buildSearchBarQuery(route.query, query, filterParams, limit.value)
 
-  fetchResults(newQuery, { navigation: "push" })
+  fetchResults(newQuery, { navigation: NAVIGATION.PUSH })
 }
 
 function onSort({ sort, order }, opts = {}) {
@@ -298,7 +299,7 @@ function onSort({ sort, order }, opts = {}) {
     ...(filterParams.length ? { filter: filterParams } : {}),
   }
 
-  fetchResults(newQuery, { navigation: "push" })
+  fetchResults(newQuery, { navigation: NAVIGATION.PUSH })
 }
 
 // Load more results by increasing visible results
@@ -319,7 +320,7 @@ function loadMore(opts = {}) {
     ...(filterParams.length ? { filter: filterParams } : {}),
   }
 
-  fetchResults(newQuery, { mode: "append", navigation: "replace" })
+  fetchResults(newQuery, { mode: SEARCH_MODE.APPEND, navigation: NAVIGATION.REPLACE })
 }
 
 function showAll(opts = {}) {
@@ -340,7 +341,7 @@ function showAll(opts = {}) {
     ...(filterParams.length ? { filter: filterParams } : {}),
   }
 
-  fetchResults(newQuery, { mode: "results", navigation: "replace" })
+  fetchResults(newQuery, { mode: SEARCH_MODE.RESULTS, navigation: NAVIGATION.REPLACE })
 }
 
 // Accepts:
@@ -374,9 +375,9 @@ function onFilterChange(filters, opts = {}) {
   }
 
   if (isBucketOnly) {
-    fetchResults(newQuery, { mode: "facets", navigation: "replace" })
+    fetchResults(newQuery, { mode: SEARCH_MODE.FACETS, navigation: NAVIGATION.REPLACE })
   } else {
-    fetchResults(newQuery, { mode: "results", navigation: "push" })
+    fetchResults(newQuery, { mode: SEARCH_MODE.RESULTS, navigation: NAVIGATION.PUSH })
   }
 }
 
@@ -400,7 +401,7 @@ function onClearFilters() {
     limit: String(pageSize),
   }
 
-  fetchResults(newQuery, { navigation: "push" })
+  fetchResults(newQuery, { navigation: NAVIGATION.PUSH })
 }
 
 // Clear only the search term (keep current filters/sort/order)
@@ -422,7 +423,7 @@ function onClearSearch() {
     ...(filterParams.length ? { filter: filterParams } : {}),
   }
 
-  fetchResults(newQuery, { navigation: "push" })
+  fetchResults(newQuery, { navigation: NAVIGATION.PUSH })
 }
 
 function onRemoveFilter({ field, value }) {
@@ -449,7 +450,7 @@ function onRemoveFilter({ field, value }) {
     ...(filterParams.length ? { filter: filterParams } : {}),
   }
 
-  fetchResults(newQuery, { navigation: "push" })
+  fetchResults(newQuery, { navigation: NAVIGATION.PUSH })
 }
 
 function onInspect(raw) {
@@ -466,7 +467,7 @@ watch(
     }
 
     syncSearchStateFromRoute(route.query)
-    fetchResults({ ...route.query }, { navigation: "none" })
+    fetchResults({ ...route.query }, { navigation: NAVIGATION.NONE })
   },
   { flush: "sync" },
 )
@@ -483,7 +484,7 @@ onMounted(async () => {
   syncSearchStateFromRoute(normalized)
 
   // Fetch initial results based on the normalized query
-  fetchResults({ ...normalized }, { navigation: "replace" })
+  fetchResults({ ...normalized }, { navigation: NAVIGATION.REPLACE })
 
   // After the first auto-run from SearchBar, ignore extra initial “search” events
   booted.value = true
