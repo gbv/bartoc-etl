@@ -1,9 +1,8 @@
 import WebSocket from "ws";
 import config from "../conf/conf";
-import { SolrUpsertPayload } from "../types/solr";
+import type { SolrUpsertPayload } from "../types/solr";
 import { getTerminologiesQueue } from "../queue/worker";
-import { normalizeWsMessage, shouldProcess, toOperationType, OperationType } from "../types/wsNormalized";
-import { coerceConceptSchemeDocument } from "../utils/coerceConceptScheme";
+import { buildVocChangeMessageResult, type VocChangeEventInfo } from "./vocChangeMessage";
 
 const BATCH_SIZE = config.queues?.terminologiesQueue?.batchSize ?? 50;
 const BATCH_TIMEOUT = config.queues?.terminologiesQueue?.limiter?.duration ?? 1000;
@@ -55,6 +54,15 @@ const wsStatus = {
 
 function toIso(ms: number) {
   return ms ? new Date(ms).toISOString() : empty;
+}
+
+function updateLastEvent(event: VocChangeEventInfo) {
+  wsStatus.receivedEvents += 1;
+  wsStatus.lastEvent = {
+    type: event.type,
+    id: event.id,
+    receivedAt: event.receivedAt,
+  };
 }
 
 export async function getWsStatus() {
@@ -187,75 +195,42 @@ export async function startVocChangesListener(): Promise<void> {
       wsStatus.lastMessageAt = toIso(Date.now());
 
       const text = data.toString();
-      let raw: unknown;
+      const result = buildVocChangeMessageResult(text, toIso(Date.now()));
 
-      try {
-        raw = JSON.parse(text);
-      } catch (err: unknown) {
-        const message =
-          err instanceof Error
-            ? (err.stack ?? err.message)
-            : typeof err === "string"
-              ? err
-              : JSON.stringify(err);
-
+      if (result.kind === "invalid-json") {
         wsStatus.lastErrorAt = toIso(Date.now());
-        wsStatus.lastError = message;
+        wsStatus.lastError = result.error;
 
-        config.error?.(`[WS] message parse error: ${message}`);
-        config.error?.(`[WS] raw payload: ${text}`);
-        return; // critical: don't continue
+        config.error?.(`[WS] message parse error: ${result.error}`);
+        config.error?.(`[WS] raw payload: ${result.rawPayload}`);
+        return;
       }
 
-      const ev = normalizeWsMessage(raw);
-      if (!ev) return;
+      if (result.kind === "ignored") return;
 
-      // ignore legacy broadcasts (no type)
-      if (!ev.op) {
+      if (result.kind === "legacy") {
         wsStatus.legacySkipped = (wsStatus.legacySkipped ?? 0) + 1;
         return;
       }
 
-      if (!shouldProcess(ev)) return;
-
-      const op = toOperationType(ev.op);
       config.log?.(
-        `[WS] ${op} id=${ev.id} modified=${ev.modified ?? "<none>"} legacy=${ev.legacy}`,
+        `[WS] ${result.event.type} id=${result.event.id} modified=${result.event.modified ?? "<none>"} legacy=${result.event.legacy}`,
       );
 
-      wsStatus.receivedEvents += 1;
-      wsStatus.lastEvent = {
-        type: op,
-        id: ev.id,
-        receivedAt: toIso(Date.now()),
-      };
+      updateLastEvent(result.event);
 
       // TODO Delete: ignore for now (rare) or handle separately later
-      if (op === OperationType.Delete) return;
+      if (result.kind === "delete") return;
 
-      const doc = coerceConceptSchemeDocument(ev.doc);
-      if (!doc) {
-        config.warn?.(`[WS] skipping event id=${ev.id}: cannot coerce ConceptSchemeDocument`);
+      if (result.kind === "invalid-document") {
+        config.warn?.(
+          `[WS] skipping event id=${result.event.id}: cannot coerce ConceptSchemeDocument`,
+        );
         return;
       }
-
-      // Need a document for upsert
-      if (!doc) {
-        wsStatus.lastErrorAt = toIso(Date.now());
-        wsStatus.lastError = "Missing document on non-delete event";
-        config.warn?.(`[WS] skip: missing document for op=${op} id=${ev.id}`);
-        return;
-      }
-
-      const upsert: SolrUpsertPayload = {
-        operation: op,
-        document: doc,
-        id: ev.id,
-        receivedAt: toIso(Date.now()),
-      };
 
       // approach with coalescing
-      bufferById.set(upsert.id, upsert);
+      bufferById.set(result.payload.id, result.payload);
 
       if (bufferById.size >= BATCH_SIZE) {
         await flushBuffer();
