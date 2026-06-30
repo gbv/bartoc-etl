@@ -83,7 +83,11 @@ import {
   normalizeLegacyQueryFromRoute,
 } from "../utils/legacy.js"
 import { normalizeSort } from "../utils/sortDefaults.js"
-import { buildSearchBarQuery } from "../utils/searchQuery.js"
+import {
+  buildQueryWithFilters,
+  buildQueryWithoutSearch,
+  buildSearchBarQuery,
+} from "../utils/searchQuery.js"
 import { appendQueryToParams } from "../utils/utils.js"
 import { SEARCH_MODE, NAVIGATION } from "../constants/search.js"
 
@@ -364,15 +368,7 @@ function onFilterChange(filters, opts = {}) {
   const filterParams = buildRepeatableFiltersFromState(opts)
 
   // update URL + fetch
-  const base = { ...route.query }
-  delete base.filter
-  delete base.start
-
-  const newQuery = {
-    ...base,
-    limit: String(pageSize),
-    ...(filterParams.length ? { filter: filterParams } : {}),
-  }
+  const newQuery = buildQueryWithFilters(route.query, filterParams, pageSize)
 
   if (isBucketOnly) {
     fetchResults(newQuery, { mode: SEARCH_MODE.FACETS, navigation: NAVIGATION.REPLACE })
@@ -411,17 +407,8 @@ function onClearSearch() {
 
   const filterParams = buildRepeatableFiltersFromState()
 
-  const base = { ...route.query }
-  delete base.search
-  delete base.field
-  delete base.filter
-  delete base.start
-
-  const newQuery = {
-    ...base,
-    limit: String(pageSize),
-    ...(filterParams.length ? { filter: filterParams } : {}),
-  }
+  const base = buildQueryWithoutSearch(route.query)
+  const newQuery = buildQueryWithFilters(base, filterParams, pageSize)
 
   fetchResults(newQuery, { navigation: NAVIGATION.PUSH })
 }
@@ -440,15 +427,8 @@ function onRemoveFilter({ field, value }) {
   limit.value = pageSize
 
   // update URL + fetch
-  const base = { ...route.query }
-  delete base.filter
-  delete base.start
 
-  const newQuery = {
-    ...base,
-    limit: String(pageSize),
-    ...(filterParams.length ? { filter: filterParams } : {}),
-  }
+  const newQuery = buildQueryWithFilters(route.query, filterParams, pageSize)
 
   fetchResults(newQuery, { navigation: NAVIGATION.PUSH })
 }
