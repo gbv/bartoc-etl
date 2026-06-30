@@ -91,10 +91,15 @@ import {
 import { appendQueryToParams } from "../utils/utils.js"
 import { SEARCH_MODE, NAVIGATION } from "../constants/search.js"
 import { fetchSearchResults } from "../utils/searchApi.js"
+import { useSearchNavigation } from "../composables/useSearchNavigation.js"
 
 // Router hooks
 const router = useRouter()
 const route = useRoute()
+const {
+  updateSearchRoute,
+  isInternalRouteChange,
+} = useSearchNavigation({ router, route })
 
 // Pagination settings
 const pageSize = 10
@@ -109,8 +114,6 @@ const errorMessage = ref(null)
 const sortBy = ref()
 const lookupUri = ref()
 const booted = ref(false) // useful for ignoring first search event from SearchBar
-// Guards the route watcher while fetchResults intentionally updates the URL.
-let isInternalNavigation = false
 
 
 // download URL for current search (used by SearchControls)
@@ -199,19 +202,7 @@ async function fetchResults(query, opts = {}) {
 
     // Real search-state changes push history; result expansion replaces it.
     // Back/Forward uses "none" because the route has already changed.
-    if (navigation !== NAVIGATION.NONE) {
-      const location = { name: route.name || "search", query: urlQuery }
-      isInternalNavigation = true
-      try {
-        if (navigation === NAVIGATION.PUSH) {
-          await router.push(location)
-        } else {
-          await router.replace(location)
-        }
-      } finally {
-        isInternalNavigation = false
-      }
-    }
+    await updateSearchRoute(urlQuery, navigation)
 
     const { docs, numFound, facets } = await fetchSearchResults({
       baseQuery: base,
@@ -419,7 +410,7 @@ function onInspect(raw) {
 watch(
   () => route.fullPath,
   () => {
-    if (!booted.value || isInternalNavigation) {
+    if (!booted.value || isInternalRouteChange()) {
       return
     }
 
