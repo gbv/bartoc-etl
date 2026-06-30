@@ -28,7 +28,7 @@ This application extracts JSKOS data with metadata about terminologies from [BAR
 
 ### Requirements
 
-- an URL to download database dumps with JSKOS concept schemes (by default <https://bartoc.org/data/dumps/latest.ndjson>)
+- a URL to download database dumps with JSKOS concept schemes. Set the `BARTOC_DUMP` environment variable to override the dump URL; use `.env` for local development or [`docker/docker-compose.yml`](docker/docker-compose.yml#L25) for Docker. By default it is `${BARTOC_BASE}/data/dumps/latest.ndjson`.
 - a Solr search server instance with configured scheme as expected by BARTOC search
 - a jskos-server instance with `/voc/changes` API endpoint (by default the BARTOC instance available at <https://bartoc.org/api>) for live updates
 - either Docker to run from a Docker image or Node.js >= 18 and Redis to run from sources
@@ -567,11 +567,13 @@ See `docker-compose.yml` in directory `docker` for boilerplate.
 When `indexDataAtBoot` is enabled, the app will automatically:
 
 1. Wait for Solr to be ready (with retries if needed)
-2. Download the latest NDJSON dump from BARTOC
+2. Download the configured NDJSON dump from `BARTOC_DUMP`
 3. Parse and transform records on the fly
 4. Batch and index them into Solr
 
 This is handled by `connectToSolr()` and `bootstrapIndexSolr()`—no manual steps required.
+
+Configure the dump source with the `BARTOC_DUMP` environment variable. For local development, put it in `.env`; for Docker, set it in the app service environment, as shown in [`docker/docker-compose.yml`](docker/docker-compose.yml#L25).
 
 #### Solr Schema
 
