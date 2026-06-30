@@ -1,23 +1,44 @@
+# Solr Index Schema
 
-### Comments on Solr schema
+This is the human-readable documentation for the BARTOC Search Solr index. Keep field descriptions and public facet mappings here instead of repeating them in the README.
 
-This document explains the design decisions and structure of the Solr schema used in the bartoc-search project. The schema has been firstly designed to balance flexibility, multilingual content handling, and optimized full-text search across structured and unstructured data.
+The runtime Solr configuration lives in `docker/solr-config/terminologies-configset/conf/schema.xml`. The indexing implementation lives in `src/server/solr/solr.ts`, with the TypeScript document shape in `src/server/types/solr.ts`.
 
-### Field Types
+This document explains the design decisions and structure of the Solr schema used in the bartoc-search project. The schema balances flexibility, multilingual content handling, and optimized full-text search across structured and unstructured data.
+
+## Public Facet Keys
+
+Use these public keys in the API `filter` parameter. The server maps them to Solr fields:
+
+| Public key | Solr field | Notes |
+| --- | --- | --- |
+| `type` | `type_uri` | KOS Type URIs |
+| `ddc` | `ddc_root_ss` | DDC root notations |
+| `language` | `languages_ss` | ISO codes |
+| `in` | `listed_in_ss` | Registry URIs |
+| `api` | `api_type_ss` | API protocol identifiers |
+| `access` | `access_type_ss` | Access policy |
+| `license` | `license_group_ss` | Canonical license groups |
+| `format` | `format_group_ss` | Canonical format groups |
+| `country` | `address_country_s` | Country |
+| `publisher` | `publisher_labels_ss` | Publisher display label |
+
+## Field Types
 
 
 | Name     | Class                 | Description                                                                                                                                                |
 | -------- | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `string` | `solr.StrField`       | Non-tokenized strings for IDs, exact keywords, and URIs.|
 | `boolean` | `solr.BoolField` | True/false flag. |
-| `lc_keyword` | `solr.StrField`   | Case-insensitive keyword, Uses KeywordTokenizer + LowerCaseFilter|
+| `lc_keyword` | `solr.TextField`   | Case-insensitive keyword using KeywordTokenizer + LowerCaseFilter. |
 | `long`   | `solr.LongPointField` | 64-bit integers (used for internal versioning `_version_`).|
 | `text`   | `solr.TextField`      | Full-text fields with custom analyzers for English: specials folding, word-delimiter, unicode folding, synonym expansion, stemming, and duplicate removal.|
 | `pdate`  | `solr.TrieDateField`  | ISO 8601 date fields. (*Note: currently `TrieDateField`; consider moving to `DatePointField` in a future Solr major release.*)|
 | `pint`   | `solr.TrieIntField`   | 32-bit integer fields. (*Note: currently `TrieIntField`; consider `IntPointField` later.*)|
+| `text_trigram` | `solr.TextField` | Character trigram text field used for typo-tolerant fallback matching. |
 
 
-### Field Definitions
+## Field Definitions
 Each field is configured with `indexed`, `stored`, and `multiValued` attributes to match our data model and search requirements:
 | Field              | Type     | Indexed | Stored | MultiValued | Description                                                 |
 | -----------------  | -------- | :-----: | :----: | :---------: | ----------------------------------------------------------- |
@@ -31,34 +52,35 @@ Each field is configured with `indexed`, `stored`, and `multiValued` attributes 
 | `address_street_s`    | `lc_keyword` |    ✓    |    ✓   |      x     | Street address line (e.g., via Monte del Gallo 47) |
 | `api_type_ss`      | `string` |    ✓    |    ✓   |     ✓     | One or more API-type identifiers (e.g. jskos, skosmos, sparql) denoting the service/interface protocols supported by the record.|
 | `api_url_ss`       | `string` |    x    |    ✓   |     ✓     | One or more fully qualified endpoint URLs corresponding to each api_type_ss entry.|
-| `contact_email_s`  | `string` |    ✓    |    ✓   |     x     | Email address of anyone in charge of the vocabulary |
+| `contact_email_s`  | `lc_keyword` |    ✓    |    ✓   |     x     | Email address of anyone in charge of the vocabulary |
 | `display_hideNotation_b`  | `boolean` |    ✓    |    ✓   |     x     | Hide notation it is only used as internal identifier  |
 | `display_numericalNotation_b`  | `boolean` |    ✓    |    ✓   |     x     | Numerical notation concepts of the vocabulary will be sorted numerically when displayed as a list  |
 | `examples_ss`      | `lc_keyword` | ✓ | ✓ | ✓ | Example sentences/snippets from JSKOS EXAMPLES field; |
-| `format_type_ss`   | `array`  |    x    |    ✓   |     ✓     | A multivalued list of machine-readable format identifiers (URIs) describing the available resource formats. |
-| `format_group_ss`  | `array`  |    x    |    ✓   |     ✓     | Canonical format category labels (e.g. “PDF”, “HTML”, “Spreadsheet”) derived by mapping individual format URIs to standardized groups. |
-| `alt_labels_ss`    | `array`  |    x    |    ✓   |     ✓     | Language-agnostic aggregate of all altLabel values. Trimmed and de-duplicated across languages.|
-| `contributor_uri_ss` | `array`  |    x    |    ✓   |     ✓    | Aggregate of all contributor uris|
-| `contributor_ss`   | `array`  |    x    |    ✓   |     ✓  | Language-agnostic aggregate of all contributor values. Trimmed and de-duplicated across languages.|
+| `format_type_ss`   | `string`  |    ✓    |    ✓   |     ✓     | Machine-readable format identifiers (URIs) describing the available resource formats. |
+| `format_group_ss`  | `string`  |    ✓    |    ✓   |     ✓     | Canonical format category labels (e.g. “PDF”, “HTML”, “Spreadsheet”) derived by mapping individual format URIs to standardized groups. |
+| `alt_labels_ss`    | `string`  |    ✓    |    ✓   |     ✓     | Language-agnostic aggregate of all altLabel values. Trimmed and de-duplicated across languages.|
+| `contributor_uri_ss` | `string`  |    ✓    |    ✓   |     ✓    | Aggregate of all contributor URIs. |
+| `contributor_ss`   | `string`  |    ✓    |    ✓   |     ✓  | Language-agnostic aggregate of all contributor values. Trimmed and de-duplicated across languages.|
 | `created_dt`       | `pdate`  |    ✓    |    ✓   |      x     | Document creation timestamp (ISO 8601).                     |
-| `creator_uri_ss`   | `array`  |    x    |    ✓   |     ✓    | Aggregate of all creator uris|
-| `creator_ss`       | `array`  |    x    |    ✓   |     ✓  | Language-agnostic aggregate of all creator values. Trimmed and de-duplicated across languages.|
-| `distribution_download_ss`| `array` |    x    |    ✓   |     ✓  |   Download URLs for the record’s distributions.
-| `distribution_format_ss` | `array`  |    ✓   |    ✓   |     ✓  |   Distribution format labels (case-insensitive exact match), e.g., CSV, JSON.
-| `distribution_mimetype_ss` | `array`|    ✓   |    ✓   |     ✓  |    Distribution MIME types, e.g., text/csv, application/json.
-| `extent_s`       | string   |    ✓   |    ✓   |     x  |  Original extent string, as provided (display-only). |
-| `fullrecord`       | `string` |  	 x	  |    ✓ 	 |	   x      | The complete, unextended JSKOS record (raw JSON) as a string.|
+| `creator_uri_ss`   | `string`  |    ✓    |    ✓   |     ✓    | Aggregate of all creator URIs. |
+| `creator_ss`       | `string`  |    ✓    |    ✓   |     ✓  | Language-agnostic aggregate of all creator values. Trimmed and de-duplicated across languages.|
+| `definition_ss`    | `string`  |    ✓    |    ✓   |     ✓  | Language-agnostic aggregate of all definition values. Trimmed and de-duplicated across languages. |
+| `distributions_download_ss`| `string` |    ✓    |    ✓   |     ✓  | Download URLs for the record's distributions. |
+| `distributions_format_ss` | `lc_keyword`  |    ✓   |    ✓   |     ✓  | Distribution format labels (case-insensitive exact match), e.g., CSV, JSON. |
+| `distributions_mimetype_ss` | `lc_keyword`|    ✓   |    ✓   |     ✓  | Distribution MIME types, e.g., text/csv, application/json. |
+| `extent_s`       | `string`   |    ✓   |    ✓   |     x  | Original extent string, as provided (display-only). |
+| `fullrecord`       | `string` |    x    |    ✓    |      x      | The complete, unextended JSKOS record (raw JSON) as a string.|
 | `identifier_ss`    | `string` |  	 ✓ 	  |    ✓ 	 |	   ✓     | Additional identifiers of the resource; corresponds to the JSKOS identifier field (alternate URIs or local IDs).|
-| `languages_ss`     | `array` |    ✓    |    ✓   |     ✓     | ISO language codes of the document.                         |
+| `languages_ss`     | `string` |    ✓    |    ✓   |     ✓     | ISO language codes of the document.                         |
 | `listed_in_ss`     | `string` |    ✓    |    ✓   |     ✓     | Registry URIs of the scheme(s) that include this vocabulary, coming from JSKOS partOf|
 | `license_type_ss`  | `string` |    ✓    |    ✓   |     ✓     | A multivalued list of machine-readable license identifiers (URIs) under which the resource is released. |
 | `license_group_ss` | `string` |    ✓    |    ✓   |     ✓     | Canonical license category labels (e.g. “CC BY”, “CC BY-SA”, “Public Domain”, “WTFPL”) derived by mapping individual license URIs to a standardized group.|
 | `namespace_s`      | `string` |    ✓    |    ✓   |      x     | Namespace (URI prefix) of the Concept Scheme; corresponds to the JSKOS namespace field |
-| `notation_ss`      | `array`  |   ✓    |    ✓   |     ✓     | Notational codes/identifiers from JSKOS notation |
-| `notation_examples_ss`| `array`  |   ✓    |    ✓   |     ✓     | Example notational codes from JSKOS notationExamples |
+| `notation_ss`      | `lc_keyword`  |   ✓    |    ✓   |     ✓     | Notational codes/identifiers from JSKOS notation |
+| `notation_examples_ss`| `lc_keyword`  |   ✓    |    ✓   |     ✓     | Example notational codes from JSKOS notationExamples |
 | `notation_pattern_s`| `string`  |   x    |    ✓   |     x     |  Regex pattern from JSKOS notationPattern |
 | `publisher_uri_ss`     | `string` |    ✓    |    ✓   |    ✓      | Identifier URI of the publisher.  |
-| `publisher_labels_ss`     | `string` |    ✓    |    ✓   |    ✓      | Aggregate of all prefered publisher labels   |
+| `publisher_labels_ss`     | `lc_keyword` |    ✓    |    ✓   |    ✓      | Aggregate of all preferred publisher labels. |
 | `pref_labels_ss`   | `string` |    ✓    |    ✓   |      ✓     | Aggregate of all preferred titles (trimmed, de-duplicated). |
 | `subject_uri` | `string` |  ✓  |  ✓  |   ✓   | Subject concept URIs. |
 | `subject_notation` | `lc_keyword` |  ✓  |  ✓  |   ✓   | Subject notations (codes). |
@@ -74,35 +96,56 @@ Each field is configured with `indexed`, `stored`, and `multiValued` attributes 
 | `ddc_ss`           | `string` |    ✓    |    ✓   |     ✓     | Dewey Decimal Classification notations.                     |
 | `ddc_root_ss`      | `string` |    ✓    |    ✓   |     ✓     | Dewey Decimal Classification notations only at root level.  |
 | `ddc_ancestors_ss` | `string` |    ✓    |    ✓   |      ✓      | Hierarchical expansion of DDC integer notations. For each DDC class with an integer notation, all numeric prefixes are added (e.g., `420` → `["4","42","420"]`, `453` → `["4","45","453"]`). Used to support “bucket” filtering like `ddc:42` (420–429) and exact class queries like `ddc:420` without requiring range queries. Decimal notations (e.g., `32.1`) are not expanded and remain exact in `ddc_ss`. |
+| `ddc_label_rank1_t` | `text` |    ✓    |    ✓   |     ✓     | Labels of the exact DDC assignments. |
+| `ddc_label_rank2_t` | `text` |    ✓    |    ✓   |     ✓     | Labels of immediate DDC ancestors and memberSet components. |
+| `ddc_label_rank3_t` | `text` |    ✓    |    ✓   |     ✓     | Labels of root DDC ancestors. |
 | `modified_dt`      | `pdate`  |    ✓    |    ✓   |      x     | Last modification timestamp (ISO 8601).                     |
 | `start_date_i`     | `pint`   |    ✓    |    ✓   |      x     | Start year (integer) of the classification.                 |
 | `url_s`            | `string` |    ×    |    ✓   |      x     | Canonical URL for more information (not indexed).           |
-| `title_sort`       | `string` |    ✓    |    ✓   |      x     | Sortable, un-analyzed title.                                |
+| `title_sort`       | `lc_keyword` |    ✓    |    ✓   |      x     | Sortable, un-analyzed title.                                |
 | `type_uri`         | `string` |    ✓    |    ✓   |     ✓     | SKOS/NKOS type URIs (e.g. ConceptScheme, thesaurus).        |
 | `title_search`     | `text`   |    ✓    |    ×   |     ✓     | Dedicated, multi-valued title field for title-only queries. |
-| `title_trigram` | text_trigram | ✓ | × | ✓ | Trigram-indexed title field for typo-tolerant matching; filled via copyField from title_*. |
-| `allfields_trigram` | text_trigram | ✓ | × | ✓ | Trigram-indexed catch-all mirror of allfields, used as a low-boost fuzzy fallback in queries. |
+| `title_trigram` | `text_trigram` | ✓ | × | ✓ | Trigram-indexed title field for typo-tolerant matching; filled via copyField from `title_*`. |
+| `allfields_trigram` | `text_trigram` | ✓ | × | ✓ | Trigram-indexed catch-all mirror of `allfields`, used as a low-boost fuzzy fallback in queries. |
+| `allfields` | `text` | ✓ | × | ✓ | Catch-all full-text field populated by copyField rules. |
 
 
-### Dynamic Fields
+## DDC Enrichment Fields
+
+During indexing, DDC subject URIs are expanded by `DdcEnricher` when the DDC snapshot is available. The snapshot is generated from [`bartoc-vocabularies`](https://github.com/gbv/bartoc-vocabularies) and loaded by `DdcStore` from `ddcConcepts.last.json`.
+
+`DdcStore` reads `snapshotPath`, parses the DDC JSON, and builds an in-memory map of enriched DDC concepts. It follows JSKOS `broader` chains to build ancestors and resolves `memberSet` URIs to copy their labels.
+
+If the snapshot cannot be loaded, `DdcEnricher` is not initialized and indexing falls back to numeric root and ancestor expansion. The snapshot path can be overridden with `DDC_CONCEPTS_FILE`.
+
+- `ddc_ss`: exact DDC notations assigned to the terminology.
+- `ddc_ancestors_ss`: intermediate ancestor notations.
+- `ddc_root_ss`: top-level DDC classes used by the public `ddc` facet.
+- `ddc_label_rank1_t`: labels of the exact DDC assignments.
+- `ddc_label_rank2_t`: labels of immediate ancestors and memberSet components.
+- `ddc_label_rank3_t`: labels of root ancestors.
+
+The three `ddc_label_rank*_t` fields are copied into `allfields`, so DDC labels influence full-text matching and scoring.
+
+## Dynamic Fields
 These patterns capture additional multilingual or unforeseen fields without changing the schema:
 | Pattern         | Type     | Indexed | Stored | MultiValued | Description                                              |
 | --------------- | -------- | :-----: | :----: | :---------: | -------------------------------------------------------- |
-| `alt_label_*`   | `text`   |    ✓    |    ✓   |      x     | Language-specific alternative labels (`alt_label_de`, `alt_label_und`, etc.). |
-| `contibutor_*`  | `text`   |    ✓    |    ✓   |      x     | Language-specific contributor labels (`contibutor_de`, `contibutor_en`, etc.). |
-| `creator_*`     | `text`   |    ✓    |    ✓   |      x     | Language-specific creator labels (`creator_de`, `creator_en`, etc.). |
-| `definition_*`  | `text`   |    ✓    |    ✓   |      x     | Language-specific definition labels (`definition_de`, `definition_en`, etc.). |
+| `alt_label_*`   | `text`   |    ✓    |    ✓   |      ✓     | Language-specific alternative labels (`alt_label_de`, `alt_label_und`, etc.). |
+| `contributor_*`  | `text`   |    ✓    |    ✓   |      ✓     | Language-specific contributor labels (`contributor_de`, `contributor_en`, etc.). |
+| `creator_*`     | `text`   |    ✓    |    ✓   |      ✓     | Language-specific creator labels (`creator_de`, `creator_en`, etc.). |
+| `definition_*`  | `text`   |    ✓    |    ✓   |      ✓     | Language-specific definition labels (`definition_de`, `definition_en`, etc.). |
 | `title_*`       | `text`   |    ✓    |    ✓   |      x     | Language-specific titles (`title_en`, `title_de`, etc.). |
-| `prefLabel_*`   | `text`   |    ✓    |    ✓   |      ✓     | Per-language preferred titles (`*` = language code).     |
-| `publisher_*`   | `text`   |    ✓    |    ✓   |      ✓     | Per-language preferred titles (`*` = language code).     |
-| `subject_label_`| `text`   |    ✓    |    ✓   |      ✓     | Per-language subject labels (`prefLabel.*`).             |
+| `pref_label_*`   | `text`   |    ✓    |    ✓   |      ✓     | Per-language preferred titles (`*` = language code).     |
+| `publisher_*`   | `text`   |    ✓    |    ✓   |      ✓     | Per-language publisher labels (`*` = language code).     |
+| `subject_label_*`| `text`   |    ✓    |    ✓   |      ✓     | Per-language subject labels (`prefLabel.*`).             |
 | `type_label_*`  | `text`   |    ✓    |    ✓   |      x     | Language-specific human-readable type labels.            |
 | `*_s`           | `string` |    ✓    |    ✓   |      x     | Arbitrary string fields following `_s` suffix.           |
 | `*_i`           | `pint`   |    ✓    |    ✓   |      x     | Arbitrary integer fields.                                |
 | `*_dt`          | `pdate`  |    ✓    |    ✓   |      x     | Arbitrary date fields.                                   |
 
 
-### Copy Fields
+## Copy Fields
 To enable both targeted and global search, we copy field values into broader catch-all destinations:
 
 | Source            | Destination    |
@@ -112,18 +155,27 @@ To enable both targeted and global search, we copy field values into broader cat
 | `alt_labels_ss`   | `allfields`    |
 | `contributor_*`   | `allfields`    |
 | `contributor_ss`  | `allfields`    |
+| `creator_*`       | `allfields`    |
+| `creator_ss`      | `allfields`    |
+| `definition_*`    | `allfields`    |
+| `definition_ss`   | `allfields`    |
 | `examples_ss`     | `allfields`    |
 | `notation_ss`     | `allfields`    |
-| `title_*`         | `allfields`    |
-| `definition_ss`   | `allfields`    |
-| `publisher_label` | `allfields`    |
+| `publisher_*`     | `allfields`    |
+| `publisher_labels_ss` | `allfields` |
+| `pref_label_*`    | `allfields`    |
+| `pref_labels_ss`  | `allfields`    |
+| `subject_label_*` | `allfields`    |
 | `subject_notation`| `allfields`    |
-| `subject_label_* `| `allfields`    |
-| `type_label_* `   | `allfields`    |
+| `title_*`         | `allfields`    |
+| `type_label_*`    | `allfields`    |
+| `ddc_label_rank1_t` | `allfields`  |
+| `ddc_label_rank2_t` | `allfields`  |
+| `ddc_label_rank3_t` | `allfields`  |
 | `title_*`         | `title_search` |
 | `title_en`        | `title_sort`   |
 | `title_*`         | `title_trigram` |
-| `allfields*`      | `allfields_trigram` |
+| `allfields`       | `allfields_trigram` |
 
 
 - allfields
@@ -132,7 +184,7 @@ A multi-valued text field that aggregates most human-readable content for global
 - title_search
 A dedicated text field optimized for title-only searches.
 
-### Exact abbreviation boost
+## Exact abbreviation boost
 
 For global search (`allfields`), exact matches in `notation_ss` and
 `alt_labels_ss` get an extra boost. This helps short names and abbreviations,
@@ -143,7 +195,7 @@ This boost is not used for field-specific searches such as `title_search` or
 `subject_notation`.
 
 
-### Fuzzy search via character trigrams (baseline)
+## Fuzzy search via character trigrams (baseline)
 
 A small, safe way to make global search resilient to typos. We add two trigram fields in Solr and a tiny bit of query glue on the server. Exact matches still win; trigrams are a soft fallback so users don’t get zero results for small mistakes.
 
@@ -215,7 +267,7 @@ OR
 - Keep min/max gram size at **3** to avoid churn and false positives.
 
 
-### Example Document Structure
+## Example Document Structure
 
 The following example illustrates a typical Solr document indexed in the bartoc-search core:
 

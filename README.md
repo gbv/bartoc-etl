@@ -218,7 +218,7 @@ All query parameters are optional.
 | **sort**        | `string` | `relevance`  | Sort field (e.g. `relevance`, `created`, `modified`).                                        |
 | **order**       | `string` | `desc`       | Sort direction: `asc` or `desc`.                                                             |
 | **start**       | `number` | `0`          | Zero-based index of first result to return (for paging).                                     |
-| **filter**      | `string` |  -           | Facet filters as `filter=<publicKey>:<csvValues>`. Repeat for multiple facets. See the mapping table below |
+| **filter**      | `string` |  -           | Facet filters as `filter=<publicKey>:<csvValues>`. Repeat for multiple facets. See the public facet keys in [Solr schema](solr_schema.md#public-facet-keys). |
 
 #### Faceted filtering with repeatable `filter=` param
 
@@ -266,111 +266,14 @@ All query parameters are optional.
 /api/search?filter=language:    # return the full Language bucket (no restriction)
 ```
 
-##### Public facet keys → internal fields
+##### Public facet keys
 
-Use these **public keys** in the `filter` param. The server maps them to Solr fields:
-
-| Public key | Internal field | Notes |
-| --- | --- | --- |
-| `type` | `type_uri` | KOS Type URIs |
-| `ddc` | `ddc_root_ss` | DDC root notations |
-| `language` | `languages_ss` | ISO codes |
-| `in` | `listed_in_ss` | registry URIs |
-| `api` | `api_type_ss` | API protocol identifiers |
-| `access` | `access_type_ss` | Access policy |
-| `license` | `license_group_ss` | Canonical license groups |
-| `format` | `format_group_ss` | Canonical format groups |
-| `country` | `address_country_s` | Country |
-| `publisher` | `publisher_labels_ss` | Publisher display label |
+Use the public facet keys documented in [Solr schema](solr_schema.md#public-facet-keys). The server maps them to internal Solr fields.
 
 
 **DDC subject enrichment**
 
-BARTOC Search can enrich DDC subject assignments during indexing to improve faceting and ranking. It relies on a precomputed DDC JSKOS snapshot (generated from[`bartoc-vocabularies`](https://github.com/gbv/bartoc-vocabularies)) and a lightweight in-memory lookup (`DdcStore` + `DdcEnricher`).
-
-During indexing, the DDC subject URIs are extracted and passed to `DdcEnricher.expandUris`, which consults the precomputed DDC snapshot to resolve ancestors and component notations.
-
-The DDC snapshot is downloaded and maintained like any other source. At application startup, `DdcStore` reads `ddcConcepts.last.json`, loads `snapshotPath`, parses the DDC JSON and builds an in-memory map of enriched `DdcConcept` objects:
-
-- follows the JSKOS `broader` chain to build `ancestors` (top-down),
-- resolves `memberSet` URIs to DDC concepts and copies their labels.
-
-If the snapshot cannot be loaded (missing meta file, invalid JSON, etc.), the `DdcEnricher` is not initialized and BARTOC Search falls back to the legacy “numeric-only” expansion (prefixes of the DDC notation).
-
-You can override the snapshot path explicitly with `DDC_CONCEPTS_FILE` – absolute or relative path to a DDC JSON file.
-
-The following Solr fields are populated from the DDC expansion:
-
-- `ddc_ss`
-  Exact DDC notations assigned to the terminology.
-
-  Example (languages & literatures of Romance languages):
-
-  ```json
-  "ddc_ss": ["440", "450", "460", "840", "850", "860"]
-  ```
-
-- `ddc_ancestors_ss`
-  Intermediate ancestor notations (excluding the root and the main class).
-
-  For the example above:
-
-  ```json
-  "ddc_ancestors_ss": ["44", "45", "46", "84", "85", "86"]
-  ```
-
-- `ddc_root_ss`
-  Root notations (top-level DDC classes derived from the ancestor chain).
-
-  For the same terminology:
-
-  ```json
-  "ddc_root_ss": ["4", "8"]
-  ```
-
-  where `4` = *Language*, `8` = *Literature*.
-
-- `ddc_label_rank1_t`
-  Labels of the main DDC classes assigned to the terminology.
-
-  ```json
-  "ddc_label_rank1_t": [
-    "Romance languages; French",
-    "Italian, Romanian & related languages",
-    "Spanish & Portuguese languages",
-    "Literatures of Romance languages",
-    "Italian, Romanian & related literatures",
-    "Spanish & Portuguese literatures"
-  ]
-  ```
-
-- `ddc_label_rank2_t`
-  Labels of **immediate ancestors** and **memberSet components**.
-
-  Example for a vocabulary with subjects `3`, `305`, and `971`:
-
-  ```json
-  "ddc_label_rank2_t": [
-    "Social sciences, sociology & anthropology",  // ancestor of 305
-    "History of North America",                   // ancestor of 971
-    "History & geography",                        // memberSet component
-    "Canada"                                      // memberSet component (table notation 2--71)
-  ]
-  ```
-
-- `ddc_label_rank3_t`
-  Labels of **root ancestors** (most general DDC classes involved).
-
-  For the same example:
-
-  ```json
-  "ddc_label_rank3_t": [
-    "Social sciences",
-    "History & geography"
-  ]
-  ```
-
-All three label buckets are also copied into the general `allfields` full-text field, so they influence query matching and scoring.
+DDC enrichment affects the `ddc` facet and search ranking. The indexing details and Solr fields are documented in [Solr schema](solr_schema.md#ddc-enrichment-fields).
 
 ##### Special cases
 
@@ -500,76 +403,20 @@ This is intended for UI interactions (e.g., expanding a facet to load all choice
 }
 ```
 
-##### Fields Description
+##### Response fields
 
-| Field                    | Type    | Description                                              |
-| ------------------------ | ------- | -------------------------------------------------------- |
-| `responseHeader.status`  | integer | Solr execution status (0 = success).                     |
-| `responseHeader.QTime`   | integer | Query execution time in milliseconds.                    |
-| `responseHeader.params`  | object  | Echoes back the parameters used for the query.           |
-| `response.numFound`      | integer | Total number of matching documents.                      |
-| `response.start`         | integer | Offset into the result set.                              |
-| `response.numFoundExact` | boolean | Indicates if `numFound` is an exact count.               |
-| `response.docs`          | array   | Array of document objects matching the query.            |
-| └─ `id`                  | string  | Unique document identifier (URI).                        |
-| └─ `access_type_ss`      | string  | URIs denoting the resource’s access policy (e.g. Freely available, Registration required, License required )|
-| └─ `address_code_s`      | lc_keyword | Postal/ZIP code (e.g., 00165) |
-| └─ `address_country_s`   | lc_keyword | Country name (verbatim; case-insensitive match) (e.g., Italy) |
-| └─ `address_locality_s`  | lc_keyword | City / locality (e.g., Rome) |
-| └─ `address_region_s`    | lc_keyword | Region / state / province (e.g., Lazio) |
-| └─ `address_street_s`    | lc_keyword | Street address line (e.g., via Monte del Gallo 47) |
-| └─ `api_type_ss`         | array   | One or more API-type identifiers (e.g. jskos, skosmos, sparql) denoting the service/interface protocols supported by the record.|
-| └─ `api_url_ss`          | array   | One or more fully qualified endpoint URLs corresponding to each api_type_ss entry.|
-| └─ `contact_email_s`     | string  | Email address of anyone in charge of the vocabulary |
-| └─ `display_hideNotation_b`  | boolean |  Hide notation it is only used as internal identifier  |
-| └─`display_numericalNotation_b`  | boolean |  Numerical notation concepts of the vocabulary will be sorted numerically when displayed as a list  |
-| └─ `examples_ss`         | lc_keyword |  Example sentences/snippets from JSKOS EXAMPLES field |
-| └─ `format_type_ss`      | array   | A multivalued list of machine-readable format identifiers (URIs) describing the available resource formats. |
-| └─ `format_group_ss`     | array   | Canonical format category labels (e.g. “PDF”, “HTML”, “Spreadsheet”) derived by mapping individual format URIs to standardized groups. |
-| └─ `title_en`            | string  | English title of the thesaurus or concept scheme.        |
-| └─ `title_sort`          | string  | Title normalized for sorting.                            |
-| └─ `title_und`           | string  | Title in the “undefined” (und) language.                 |
-| └─ `fullrecord`          | string  | The complete, unextended JSKOS record (raw JSON) as a string. (multilingual).                       |
-| └─ `identifier_ss`       | array   | Additional identifiers of the resource; corresponds to the JSKOS identifier field (alternate URIs or local IDs).|
-| └─ `alt_labels_ss`       | array   | Language-agnostic aggregate of all altLabel values. Trimmed and de-duplicated across languages.
-| └─ `contributor_uri_ss`  | array   | Aggregate of all contributor uris|
-| └─ `contributor_ss` | array | Language-agnostic aggregate of all contributor prefLabel values. Trimmed and de-duplicated across languages.|
-| └─ `created_dt`          | string  | Creation timestamp (ISO-8601).                           |
-| └─ `creator_uri_ss`      | array  |  Aggregate of all creator uris|
-| └─ `creator_ss`   | array  |  Language-agnostic aggregate of all creator values. Trimmed and de-duplicated across languages.|
-| └─ `definition_ss`       | array   | Language-agnostic aggregate of all definition values. Trimmed and de-duplicated across languages.
-| └─ `distribution_download_ss`       | array   | Download URLs for the record’s distributions.
-| └─ `distribution_format_ss`       | lc_keyword   | Distribution format labels (case-insensitive exact match), e.g., CSV, JSON.
-| └─ `distribution_mimetype_ss`       | lc_keyword   | Distribution MIME types, e.g., text/csv, application/json.
-| └─ `extent_s`       | string   | Original extent string, as provided (display-only). |
-| └─ `languages_ss`        | array   | Languages available (ISO codes).                         |
-| └─ `license_type_ss`     | array   | A multivalued list of machine-readable license identifiers (URIs) under which the resource is released. |
-| └─ `license_group_ss`    | array   | Canonical license category labels (e.g. “CC BY”, “CC BY-SA”, “Public Domain”, “WTFPL”) derived by mapping individual license URIs to a standardized group.|
-| └─ `namespace_s`         | string  | Namespace (URI prefix) of the Concept Scheme; corresponds to the JSKOS namespace field |
-| └─ `notation_ss`         | array  | Notational codes/identifiers from JSKOS notation |
-| └─ `notation_examples_ss`| array  | Example notational codes from JSKOS notationExamples |
-| └─ `notation_pattern_s`| array  | Regex pattern from JSKOS notationPattern |
-| └─ `listed_in_ss`        | array   | Registry URIs of the scheme(s) that include this vocabulary, coming from JSKOS partOf.|
-| └─ `ddc_ss`              | array   | Dewey Decimal Classification notations.                  |
-| └─ `ddc_root_ss`         | array   | Dewey Decimal Classification notations at root level.    |
-| └─ `pref_labels_ss`      | string  | Aggregate of all preferred titles. |
-| └─ `publisher_uri_ss`    | string  | Identifier URI of the publishing organization.           |
-| └─ `start_date_i`        |  pint   | Start year (integer) of the classification.|
-| └─ `subject_uri` | `string` | Subject concept URIs. |
-| └─ `subject_notation` | `lc_keyword` | Subject notations (codes). |
-| └─ `subject_scheme` | `string` | Subject scheme URIs (`inScheme[].uri`). |
-| └─ `subject_labels_ss` | `string` | Aggregate of all subject labels (trimmed, de-duplicated). |
-| └─ `subject_broader_uri_ss` | `string`|  Immediate broader concept URIs. |
-| └─`subject_broader_notation_ss` | `lc_keyword` | Immediate broader notations. |
-| └─ `subject_topconceptof_ss` | `string` | topConceptOf[].uri (schemes where it is a top concept). |
-| └─ `subject_type_ss`| `string` | RDF types of the subject (e.g., `skos:Concept`).                           |
-| └─ `subject_context_ss` | `string`| Stored `@context` URLs if present (display/debug).                         |
-| └─ `subject_of_url_ss`   | string  | Related resource URLs from JSKOS subjectOf  |
-| └─ `subject_of_host_ss` | lc_keyword | Hostnames extracted from URLs coming from JSKOS subjectOf (case-insensitive exact match). |
-| └─ `type_uri`            | array   | URIs indicating the resource’s SKOS/NKOS type(s).        |
-| └─ `created_dt`          | string  | Creation timestamp (ISO-8601).                           |
-| └─ `modified_dt`         | string  | Last modification timestamp (ISO-8601).                  |
-| └─ `_version_`           | integer | Solr internal version number for optimistic concurrency. |
+The API returns Solr response metadata plus matching Solr documents. Document fields are documented once in [Solr schema](solr_schema.md#field-definitions); this section only describes the response envelope.
+
+| Field                    | Type    | Description                                           |
+| ------------------------ | ------- | ----------------------------------------------------- |
+| `responseHeader.status`  | integer | Solr execution status (0 = success).                  |
+| `responseHeader.QTime`   | integer | Query execution time in milliseconds.                 |
+| `responseHeader.params`  | object  | Echoes back the parameters used for the query.        |
+| `response.numFound`      | integer | Total number of matching documents.                   |
+| `response.start`         | integer | Offset into the result set.                           |
+| `response.numFoundExact` | boolean | Indicates if `numFound` is an exact count.            |
+| `response.docs`          | array   | Matching Solr documents. See [Solr schema](solr_schema.md#field-definitions). |
+| `facet_counts.facet_fields` | object | Facet buckets keyed by Solr field; each bucket alternates value and count. |
 
 
 
@@ -728,7 +575,7 @@ This is handled by `connectToSolr()` and `bootstrapIndexSolr()`—no manual step
 
 #### Solr Schema
 
-Read the documentation [here](solr_schema.md).
+The Solr index fields, copy fields, and public facet-key mapping are documented in [solr_schema.md](solr_schema.md). The runtime Solr configuration lives in `docker/solr-config/terminologies-configset/conf/schema.xml`.
 
 #### Troubleshooting
 
