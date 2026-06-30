@@ -75,8 +75,6 @@ import {
   requestBucketFor,
   buildRepeatableFiltersFromState,
   filtersToRepeatableForUrl,
-  setFiltersFromRepeatable,
-  openGroupsForActiveFilters,
   clearAllBuckets,
 } from "../stores/filters.js"
 import {
@@ -92,6 +90,7 @@ import { appendQueryToParams } from "../utils/utils.js"
 import { SEARCH_MODE, NAVIGATION } from "../constants/search.js"
 import { fetchSearchResults } from "../utils/searchApi.js"
 import { useSearchNavigation } from "../composables/useSearchNavigation.js"
+import { useSearchRouteState } from "../composables/useSearchRouteState.js"
 
 // Router hooks
 const router = useRouter()
@@ -114,6 +113,9 @@ const errorMessage = ref(null)
 const sortBy = ref()
 const lookupUri = ref()
 const booted = ref(false) // useful for ignoring first search event from SearchBar
+const {
+  syncSearchStateFromRoute,
+} = useSearchRouteState({ route, limit, sortBy, pageSize })
 
 
 // download URL for current search (used by SearchControls)
@@ -229,17 +231,6 @@ async function fetchResults(query, opts = {}) {
       loading.value = false
     }
   }
-}
-
-// Restore local UI state from the URL on initial load and browser Back/Forward.
-function syncSearchStateFromRoute(query = route.query) {
-  clearAllBuckets()
-  resetFiltersRequested()
-  resetOpenGroups()
-  setFiltersFromRepeatable(query.filter)
-  openGroupsForActiveFilters()
-  limit.value = Number(query.limit) || pageSize
-  sortBy.value = normalizeSort(query).sort
 }
 
 // Run search from the bar; preserve current URL's sort/order and active filters.
