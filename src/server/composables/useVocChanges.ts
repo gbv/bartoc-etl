@@ -3,6 +3,7 @@ import config from "../conf/conf";
 import type { SolrJobPayload } from "../types/solr";
 import { getTerminologiesQueue } from "../queue/worker";
 import { buildVocChangeMessageResult, type VocChangeEventInfo } from "./vocChangeMessage";
+import { buildVocChangeQueueJobs } from "./vocChangeQueueJobs";
 
 const BATCH_SIZE = config.queues?.terminologiesQueue?.batchSize ?? 50;
 const BATCH_TIMEOUT = config.queues?.terminologiesQueue?.limiter?.duration ?? 1000;
@@ -88,11 +89,7 @@ async function flushBuffer() {
     const batch = Array.from(bufferById.values());
     bufferById.clear();
 
-    const jobs = batch.map((payload) => ({
-      name: payload.operation,
-      data: payload,
-      opts: { removeOnComplete: false, removeOnFail: false },
-    }));
+    const jobs = buildVocChangeQueueJobs(batch);
 
     const queue = await getTerminologiesQueue();
     if (!queue) {
