@@ -1,19 +1,8 @@
 import { Worker, Job } from "bullmq";
 import config from "../conf/conf";
 import { Queue } from "./queue";
-import type {
-  SolrDocument,
-  SolrJobPayload,
-  SolrDeletePayload,
-  SolrUpsertPayload,
-} from "../types/solr";
-import { OperationType } from "../types/wsNormalized";
-import {
-  addDocuments,
-  deleteDocuments,
-  transformConceptSchemeToSolr,
-} from "../solr/solr";
-import { getNkosConcepts } from "../utils/nskosService";
+import type { SolrJobPayload } from "../types/solr";
+import { processTerminologyJob } from "./processTerminologyJob";
 
 // Initialize (or retrieve) the BullMQ queue (async)
 const terminologiesQueuePromise = Queue<SolrJobPayload>("terminologiesQueue");
@@ -41,39 +30,10 @@ async function startWorker() {
     limiter: qc?.limiter ?? { max: 100, duration: 1000 },
   };
 
-  // Create a separate Worker for that queue, attaching the solrHandler
+  // Keep BullMQ wiring here and delegate payload handling to a testable function.
   const terminologiesWorker = new Worker<SolrJobPayload>(
     terminologiesQueue.name,
-    async (job: Job<SolrJobPayload>) => {
-      const data = job.data;
-      const { operation, id } = data as SolrUpsertPayload | SolrDeletePayload;
-      switch (operation) {
-        case OperationType.Delete:
-          config.log?.(`[Worker] Deleting ${id} from Solr…`);
-          await deleteDocuments(config.solr.coreName, [id]);
-          config.log?.(`[Worker] delete completed for id=${id}`);
-          break;
-        case OperationType.Create:
-        case OperationType.Update:
-        case OperationType.Replace: {
-          const upsert = data as SolrUpsertPayload;
-          if (!upsert.document) {
-            throw new Error(`Missing document for ${operation} ${id}`);
-          }
-          config.log?.(`[Worker] ${operation} ${id} in Solr…`);
-          const nKosConcepts = getNkosConcepts();
-          const solrDocument: SolrDocument = transformConceptSchemeToSolr(
-            upsert.document,
-            nKosConcepts,
-          );
-          await addDocuments(config.solr.coreName, [solrDocument]);
-          config.log?.(`[Worker] ${operation} completed for id=${id}`);
-          break;
-        }
-        default:
-          throw new Error(`Unsupported operation: ${operation}`);
-      }
-    },
+    async (job: Job<SolrJobPayload>) => processTerminologyJob(job.data),
     workerOpts,
   );
 
