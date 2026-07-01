@@ -167,7 +167,7 @@ function trigramFieldQuery(field: string, value: string, boost: number): string 
  * Behavior
  * - Always keep `baseLucene` unchanged (exact matches rank highest).
  * - For global searches, boost exact matches in compact identifier-like
- *   fields such as `notation_ss` and `alt_labels_ss`.
+ *   fields such as `notation_ss`, `alt_labels_ss`, and `bartoc_id_s`.
  * - For global simple queries (no quotes/operators, length ≥ 3), add generated
  *   3-character grams to:
  *     title_trigram:<grams>^0.6
@@ -220,11 +220,12 @@ export function buildLuceneWithTrigrams(opts: {
   // Always keep base query intact (exact/phrase matches get priority).
   const parts: string[] = [`(${baseLucene})`];
 
-  // Short labels and notations often act as abbreviations (e.g. "AAT").
+  // Short labels, notations, and ids often act as direct lookup keys.
   // Give exact matches there enough weight to beat incidental text matches.
   parts.push(`(${[
     exactFieldQuery("notation_ss", value, EXACT_ABBREVIATION_BOOST),
     exactFieldQuery("alt_labels_ss", value, EXACT_ABBREVIATION_BOOST),
+    exactFieldQuery("bartoc_id_s", value, EXACT_ABBREVIATION_BOOST),
   ].join(" OR ")})`);
 
   const trigramBits: string[] = [];
