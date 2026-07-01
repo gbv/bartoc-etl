@@ -44,6 +44,7 @@ Each field is configured with `indexed`, `stored`, and `multiValued` attributes 
 | -----------------  | -------- | :-----: | :----: | :---------: | ----------------------------------------------------------- |
 | `_version_`        | `long`   |    ✓    |    ✓   |      x     | Solr internal version for optimistic concurrency.           |
 | `id`               | `string` |    ✓    |    ✓   |      x     | Unique document identifier (URI).                           |
+| `bartoc_id_s`      | `string` |    ✓    |    ✓   |      x     | Numeric BARTOC node id extracted from the URI, e.g. `20541` from `http://bartoc.org/en/node/20541`. Copied to `allfields` for direct search. |
 | `access_type_ss`   | `string` |    ✓    |    ✓   |      ✓    | URIs denoting the resource’s access policy (e.g. Freely available, Registration required, License required )|
 | `address_code_s`   | `lc_keyword` |    ✓    |    ✓   |      x     | Postal/ZIP code (e.g., 00165) |
 | `address_country_s`| `lc_keyword` |    ✓    |    ✓   |      x     | Country name (verbatim; case-insensitive match) (e.g., Italy) |
@@ -153,6 +154,7 @@ To enable both targeted and global search, we copy field values into broader cat
 | `address_*`       | `allfields`    |
 | `alt_label_*`     | `allfields`    |
 | `alt_labels_ss`   | `allfields`    |
+| `bartoc_id_s`     | `allfields`    |
 | `contributor_*`   | `allfields`    |
 | `contributor_ss`  | `allfields`    |
 | `creator_*`       | `allfields`    |

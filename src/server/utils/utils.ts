@@ -41,6 +41,16 @@ export function formatTimestamp(iso: string | number | undefined): string {
   }
   return "";
 }
+
+/**
+ * Extracts the numeric BARTOC node id from a BARTOC URI.
+ *
+ * Example: http://bartoc.org/en/node/20541 -> 20541
+ */
+export function extractBartocId(uri?: string): string | undefined {
+  return uri?.match(/^https?:\/\/bartoc\.org\/(?:[^/]+\/)?node\/(\d+)\/?$/)?.[1];
+}
+
 /**
  * Resolves after the given number of milliseconds.
  */
@@ -511,6 +521,5 @@ export function pickTitleSort(prefLabel?: Record<string, string>, altLabel?: Rec
   // 4) Last resort handled by caller (e.g., URI)
   return undefined;
 }
-
 
 

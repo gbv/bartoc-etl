@@ -98,6 +98,7 @@ export interface SolrDocument
   extent_s?: string;
   fullrecord: string;
   id: string;
+  bartoc_id_s?: string;
   identifier_ss: string[];
   languages_ss: string[];
   license_type_ss?: string[];

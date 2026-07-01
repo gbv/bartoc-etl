@@ -17,7 +17,7 @@ import { fileURLToPath } from "url";
 import { ConceptSchemeDocument, GroupEntry } from "../types/jskos";
 import { sleep, mapUriToGroups, extractGroups, applyAgents, 
   applyDistributions, applyPrefLabel, applyPublishers, applySubjectOf, applySubject, pickTitleSort, 
-  loadJSONFileSafe} from "../utils/utils";
+  loadJSONFileSafe, extractBartocId } from "../utils/utils";
 import readline from "readline";
 import { extractDdc, buildDdcAncestorsFromSubjects } from "../utils/ddc";
 import { applyLangMap } from "../utils/utils";
@@ -230,6 +230,7 @@ export function transformConceptSchemeToSolr(
     format_type_ss: doc.FORMAT?.map(f => f.uri) || [],
     created_dt: doc.created,
     id: doc.uri,
+    bartoc_id_s: extractBartocId(doc.uri),
     identifier_ss: doc.identifier?.filter((id): id is string => id !== null),
     languages_ss: doc.languages || [],
     license_type_ss: doc.license?.map(lt => lt.uri) || [],
