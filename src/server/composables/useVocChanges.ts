@@ -2,6 +2,7 @@ import WebSocket from "ws";
 import config from "../conf/conf";
 import type { SolrJobPayload } from "../types/solr";
 import { getTerminologiesQueue } from "../queue/worker";
+import { bufferVocChangePayload } from "./vocChangeBuffer";
 import { buildVocChangeMessageResult, type VocChangeEventInfo } from "./vocChangeMessage";
 import { buildVocChangeQueueJobs } from "./vocChangeQueueJobs";
 
@@ -95,7 +96,7 @@ async function flushBuffer() {
     if (!queue) {
       config.error?.("terminologiesQueue unavailable: Redis not connected");
       // put back best-effort
-      for (const p of batch) bufferById.set(p.id, p);
+      for (const p of batch) bufferVocChangePayload(bufferById, p);
       return;
     }
 
@@ -224,7 +225,7 @@ export async function startVocChangesListener(): Promise<void> {
       }
 
       // Queue upserts and deletes through the same buffer.
-      bufferById.set(result.payload.id, result.payload);
+      bufferVocChangePayload(bufferById, result.payload);
 
       if (bufferById.size >= BATCH_SIZE) {
         await flushBuffer();
