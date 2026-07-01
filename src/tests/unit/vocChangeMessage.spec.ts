@@ -40,7 +40,7 @@ describe("buildVocChangeMessageResult", () => {
     expect(result).toEqual({ kind: "legacy" });
   });
 
-  it("returns delete events without an upsert payload", () => {
+  it("returns a delete payload for delete events", () => {
     const result = buildVocChangeMessageResult(
       JSON.stringify({
         objectType: "ConceptScheme",
@@ -59,6 +59,11 @@ describe("buildVocChangeMessageResult", () => {
       receivedAt: RECEIVED_AT,
       modified: "2026-01-03T09:00:00Z",
       legacy: false,
+    });
+    expect(result.payload).toEqual({
+      operation: OperationType.Delete,
+      id: "http://bartoc.org/en/node/voc-change-delete",
+      receivedAt: RECEIVED_AT,
     });
   });
 

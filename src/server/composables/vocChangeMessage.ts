@@ -1,4 +1,4 @@
-import type { SolrUpsertPayload } from "../types/solr";
+import type { SolrDeletePayload, SolrUpsertPayload } from "../types/solr";
 import {
   OperationType,
   normalizeWsMessage,
@@ -19,7 +19,7 @@ export type VocChangeMessageResult =
   | { kind: "invalid-json"; error: string; rawPayload: string }
   | { kind: "ignored" }
   | { kind: "legacy" }
-  | { kind: "delete"; event: VocChangeEventInfo }
+  | { kind: "delete"; event: VocChangeEventInfo; payload: SolrDeletePayload }
   | { kind: "invalid-document"; event: VocChangeEventInfo }
   | {
       kind: "upsert";
@@ -66,7 +66,16 @@ export function buildVocChangeMessageResult(
   };
 
   if (op === OperationType.Delete) {
-    return { kind: "delete", event };
+    // Delete events only need the id.
+    return {
+      kind: "delete",
+      event,
+      payload: {
+        operation: op,
+        id: ev.id,
+        receivedAt,
+      },
+    };
   }
 
   const document = coerceConceptSchemeDocument(ev.doc);

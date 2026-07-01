@@ -1,6 +1,6 @@
 import WebSocket from "ws";
 import config from "../conf/conf";
-import type { SolrUpsertPayload } from "../types/solr";
+import type { SolrJobPayload } from "../types/solr";
 import { getTerminologiesQueue } from "../queue/worker";
 import { buildVocChangeMessageResult, type VocChangeEventInfo } from "./vocChangeMessage";
 
@@ -8,8 +8,8 @@ const BATCH_SIZE = config.queues?.terminologiesQueue?.batchSize ?? 50;
 const BATCH_TIMEOUT = config.queues?.terminologiesQueue?.limiter?.duration ?? 1000;
 const empty: string = "<empty>";
 
-const bufferById = new Map<string, SolrUpsertPayload>(); // for coalescing by id
-const documentsBuffer: SolrUpsertPayload[] = [];
+const bufferById = new Map<string, SolrJobPayload>(); // coalesce the last job for each id
+const documentsBuffer: SolrJobPayload[] = [];
 
 let flushInterval: NodeJS.Timeout | null = null;
 let pingInterval: NodeJS.Timeout | null = null;
@@ -219,9 +219,6 @@ export async function startVocChangesListener(): Promise<void> {
 
       updateLastEvent(result.event);
 
-      // TODO Delete: ignore for now (rare) or handle separately later
-      if (result.kind === "delete") return;
-
       if (result.kind === "invalid-document") {
         config.warn?.(
           `[WS] skipping event id=${result.event.id}: cannot coerce ConceptSchemeDocument`,
@@ -229,7 +226,7 @@ export async function startVocChangesListener(): Promise<void> {
         return;
       }
 
-      // approach with coalescing
+      // Queue upserts and deletes through the same buffer.
       bufferById.set(result.payload.id, result.payload);
 
       if (bufferById.size >= BATCH_SIZE) {
