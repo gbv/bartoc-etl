@@ -7,47 +7,50 @@
   color: var(--cc-color-on-primary);
 }
 .header__container {
-  width: min(1320px, calc(100% - 32px));
   height: 60px;
-  margin: 0 auto;
-  display: flex;               
+  display: flex;
   align-items: center;
 }
+
 .header__logo {
   display: flex;
   align-items: center;
 }
+
 .header__logo-image {
   display: block;
   height: 48px;
   width: auto;
 }
+
 .header__logo a {
   display: inline-flex;
   align-items: center;
-  font-size: 1.5rem;
-  font-weight: bold;
+  font-size: var(--cc-font-size-lg);
+  font-weight: var(--cc-font-weight-bold);
   color: var(--cc-color-on-primary);
   text-decoration: none;
 }
+
 .header__nav {
   display: flex;
-  gap: 2rem;
+  gap: var(--cc-space-xl);
   width: 100%;
   justify-content: space-between;
-  padding-left: 24px;
+  padding-left: var(--cc-space-lg);
 }
 
 .header__nav-right {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  flex-wrap: wrap;
+  gap: var(--cc-space-lg);
 }
 
 .header__nav-right .user-status > a {
   color: var(--cc-color-accent);
-  font-size: 16px;
-  font-weight: normal;
+  font-size: var(--cc-font-size-base);
+  font-weight: var(--cc-font-weight-light);
   padding: 0;
 }
 
@@ -66,30 +69,27 @@
 
 .header__nav-left {
   display: flex;
-  gap: 1.5rem;  
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--cc-space-lg);
 }
 
-.header__nav-left a, 
-.header__nav-right a {
+.header__nav-link {
   color: var(--cc-color-accent);
   text-decoration: none;
-  font-size: 1rem;
+  font-size: var(--cc-font-size-base);
+  font-weight: var(--cc-font-weight-light);
   transition: color 0.2s;
 }
 
-.header__logo-text {
-  color: var(--cc-color-accent);
-  font-size: 16px;
-}
-
-.header__nav-left > a:hover,
-.header__nav-right > a:hover  {
+.header__nav-link:hover,
+.header__nav-link:focus-visible {
   text-decoration: underline;
   background-color: transparent;
   color: var(--cc-color-accent);
 }
 
-.header__add-button { 
+.header__add-button {
   flex: none;
 }
 
@@ -116,10 +116,18 @@
   .header__container {
     flex-direction: column;
     height: auto;
-    padding: 1rem;
+    padding-block: var(--cc-space-md);
   }
+
   .header__nav {
-    margin-top: 0.5rem;
-    gap: 1rem;
+    margin-top: var(--cc-space-sm);
+    gap: var(--cc-space-md);
+    padding-left: 0;
+    justify-content: center;
+  }
+
+  .header__nav-left,
+  .header__nav-right {
+    justify-content: center;
   }
 }

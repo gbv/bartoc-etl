@@ -1,36 +1,36 @@
 <template>
   <header class="header">
-    <div class="header__container noprint">
+    <div class="app-container header__container noprint">
       <div class="header__logo no-hover">
         <a href="/">
           <img
             :src="logoUrl"
             alt="BARTOC Search"
-            class="header__logo-image">
+            class="bartoc-logo__image header__logo-image">
         </a>
       </div>
       <nav class="header__nav">
         <div class="header__nav-left">
-          <a href="/about">
-            <span class="header__logo-text">About</span>
-          </a>
-          <a href="/vocabularies">
-            <span class="header__logo-text">Terminologies</span>
-          </a>
-          <a href="/registries">
-            <span class="header__logo-text">Registries</span>
-          </a>
-          <a href="/software">
-            <span class="header__logo-text">Software</span>
-          </a>
-          <a href="/stats">
-            <span class="header__logo-text">Statistics</span>
-          </a>
+          <a
+            class="header__nav-link"
+            href="/about">About</a>
+          <a
+            class="header__nav-link"
+            href="/vocabularies">Terminologies</a>
+          <a
+            class="header__nav-link"
+            href="/registries">Registries</a>
+          <a
+            class="header__nav-link"
+            href="/software">Software</a>
+          <a
+            class="header__nav-link"
+            href="/stats">Statistics</a>
         </div>
         <div class="header__nav-right">
-          <a href="/contact">
-            <span class="header__logo-text">Contact & Editors</span>
-          </a>
+          <a
+            class="header__nav-link"
+            href="/contact">Contact & Editors</a>
           <UserStatus redirect />
           <a
             v-if="userCanAdd"
