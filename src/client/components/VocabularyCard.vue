@@ -218,14 +218,14 @@ const titleHref = computed(() => {
 
 <style>
 .result-card {
-  margin: 12px 0;
-  padding: 0.75rem 1rem;
+  margin: var(--cc-space-md) 0;
+  padding: var(--cc-row-padding-y) var(--cc-row-padding-x);
   text-align: left;
   color: var(--cc-color-text);
 
   background-color: var(--cc-color-surface);
   border: 1px solid var(--cc-border-color);
-  border-radius: 6px;
+  border-radius: var(--cc-radius-md);
 
   border-left-width: 3px;
   border-left-style: solid;
@@ -250,37 +250,37 @@ const titleHref = computed(() => {
 }
 
 .result-title {
-  font-size: 1.1rem;
-  margin: 4px 0 6px;
+  font-size: var(--cc-font-size-lg);
+  margin: 0 0 var(--cc-space-sm);
   border-bottom: 1px dotted var(--cc-border-color);
-  padding-bottom: 2px;
+  padding-bottom: var(--cc-space-xs);
 }
 
 .result-title a {
   color: var(--cc-color-primary);
-  font-weight: 600;
+  font-weight: var(--cc-font-weight-regular);
 }
 
 .result-title a.api-link {
   float: right;
-  font-size: 0.9rem;
+  font-size: var(--cc-font-size-sm);
 }
 
 .result-description {
-  font-size: 0.9rem;
-  margin: 0.35rem 0.3rem;
+  font-size: var(--cc-font-size-sm);
+  margin: var(--cc-space-sm) var(--cc-space-xs);
   color: var(--cc-color-muted);
 }
 
 .result-details {
-  margin: 0.3rem;
+  margin: var(--cc-space-xs);
   list-style: none;
   padding: 0;
 }
 
 .result-details li {
-  font-size: 0.85rem;
-  margin-bottom: 4px;
+  font-size: var(--cc-font-size-sm);
+  margin-bottom: var(--cc-space-xs);
 }
 
 .kos-type-list__item {
@@ -303,14 +303,14 @@ const titleHref = computed(() => {
 
 .result-metadata {
   border-top: 1px dotted var(--cc-border-color);
-  font-size: 0.8rem;
-  padding: 0.25rem 0;
-  margin-top: 0.25rem;
+  font-size: var(--cc-font-size-sm);
+  padding: var(--cc-space-xs) 0;
+  margin-top: var(--cc-space-xs);
   color: var(--cc-color-muted);
 }
 
 .result-metadata * {
-  margin-right: 0.5rem;
+  margin-right: var(--cc-space-sm);
 }
 
 .highlighted {

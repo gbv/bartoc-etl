@@ -93,16 +93,15 @@ const showBartocOnly = computed(() => {
   color: var(--cc-color-text);
   display: flex;
   justify-content: center;
-  padding: 12px;
+  padding: var(--cc-space-md);
 }
+
 .lookup-message__uri {
   background: var(--cc-color-highlight-strong);
-  margin-right: 5px;
+  margin-right: var(--cc-space-sm);
 }
-.lookup-message__name {
-  margin-left: 5px;
-}
+
 .lookup-message__link {
-  margin-left: 5px;
+  margin-left: var(--cc-space-sm);
 }
 </style>

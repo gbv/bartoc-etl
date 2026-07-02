@@ -20,6 +20,9 @@
           <li
             v-for="facet in visibleValues"
             :key="facet.value"
+            class="facet-option list-row"
+            :class="{ 'selected-row': selected.includes(facet.value) }"
+            tabindex="0"
             @click="onRow(facet.value)"
             @keydown.enter.prevent="onRow(facet.value)"
             @keydown.space.prevent="onRow(facet.value)">
@@ -35,12 +38,12 @@
             <span class="facet-count">{{ facet.count }}</span>
           </li>
 
-          <!-- “Show all” only if we have more than MAX_INLINE_ITEMS -->
           <li
             v-if="hasMore"
             class="facet-show-more">
             <button
               type="button"
+              class="inline-action facet-show-more__button"
               @click.stop="openModal">
               see all {{ valuesRef.length }}
             </button>
@@ -49,7 +52,6 @@
       </div>
     </transition>
 
-    <!-- Modal with all entries for this facet -->
     <teleport to="body">
       <transition name="facet-modal">
         <div
@@ -67,7 +69,7 @@
               </h2>
               <button
                 type="button"
-                class="facet-modal-close"
+                class="cc-button cc-button-ghost cc-button-icon facet-modal-close"
                 aria-label="Close"
                 @click="closeModal">
                 <vue-feather
@@ -91,12 +93,19 @@
                 class="facet-modal-list">
                 <li
                   v-for="facet in filteredValues"
-                  :key="facet.value">
+                  :key="facet.value"
+                  class="facet-modal-list__item list-row"
+                  :class="{ 'selected-row': selected.includes(facet.value) }"
+                  tabindex="0"
+                  @click="onRow(facet.value)"
+                  @keydown.enter.prevent="onRow(facet.value)"
+                  @keydown.space.prevent="onRow(facet.value)">
                   <input
                     type="checkbox"
                     :value="facet.value"
                     :checked="selected.includes(facet.value)"
-                    @change="onCheckbox">
+                    @change="onCheckbox"
+                    @click.stop>
                   <span class="facet-value">
                     {{ facetValues[facet.value] ?? (facet.value === '-' ? 'no value' : facet.value) }}
                   </span>
@@ -126,7 +135,6 @@ const props = defineProps({
   open: {type: Boolean},
 })
 
-// --- “show first N items only” ---
 const MAX_INLINE_ITEMS = 6
 
 const selected = toRef(props, "selected")
@@ -145,7 +153,6 @@ const visibleValues = computed(() => {
 })
 
 
-// --- Modal state ---
 const showModal = ref(false)
 const searchTerm = ref("")
 
@@ -199,7 +206,6 @@ function toggleValue(value, nextState) {
   emit("change", newSel)
 }
 
-// Selecting the checkbox
 function onCheckbox(e) {
   toggleValue(e.target.value, e.target.checked)
 
@@ -209,10 +215,9 @@ function onCheckbox(e) {
   }
 }
 
-// Clicking on the entire row
 function onRow(value) {
   toggleValue(value)
-  
+
   if (showModal.value) {
     closeModal()
   }
@@ -221,31 +226,25 @@ function onRow(value) {
 </script>
 
 <style scoped>
-ul {
+.options-list,
+.facet-modal-list {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 
-.facet-group .facet-item {
+.facet-item {
   display: flex;
   width: 100%;
-  padding: 0.5rem;
+  padding: var(--cc-space-sm);
   border-radius: var(--cc-radius-md);
   text-align: inherit;
   justify-content: space-between;
 }
 
-.facet-badge {
-  background: var(--cc-color-primary);
-  color: var(--cc-color-on-primary);
-  padding: 0 0.5em;
-  font-size: 0.75em;
-  margin-left: 0.5em;
-}
-
 .arrow {
   color: var(--cc-color-on-primary);
-  position: relative;  
+  position: relative;
   content: "";
   display: inline-block;
   width: 8px;
@@ -259,13 +258,11 @@ ul {
   transform: rotate(315deg);
 }
 
-/* transition the max-height over 0.4s */
 .dropdown-enter-active,
 .dropdown-leave-active {
   transition: opacity 120ms ease-out, transform 120ms ease-out;
 }
 
-/* start/end states */
 .dropdown-enter-from,
 .dropdown-leave-to {
   opacity: 0;
@@ -282,25 +279,22 @@ ul {
 }
 
 .options-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
   overflow: hidden;
 }
 
-.options-list li {
+.facet-option,
+.facet-modal-list__item {
   cursor: pointer;
-  display: flex;
-  padding: 5px;
 }
 
-.options-list li:hover {
+.facet-option:hover,
+.facet-modal-list__item:hover {
   background-color: var(--cc-color-surface-muted);
   color: var(--cc-color-muted);
 }
 
-/* highlight facet-count on li hover */
-.options-list li:hover .facet-count {
+.facet-option:hover .facet-count,
+.facet-modal-list__item:hover .facet-count {
   background-color: var(--cc-color-page);
   color: var(--cc-color-text);
 }
@@ -310,27 +304,17 @@ ul {
 }
 
 .facet-value {
-  padding-left: 5px;
   text-align: left;
 }
 
-/* “Show all …” row */
 .facet-show-more {
-  padding: 5px;
+  padding-top: var(--cc-row-gap);
 }
 
-.facet-show-more button {
-  background: none;
-  border: none;
-  padding: 0;
-  color: var(--cc-color-link);
-  cursor: pointer;
-  text-decoration: none;
-  padding-left: 4px; /* visual alignment with facet values */
+.facet-show-more__button {
+  width: 100%;
 }
 
-
-/* Simple modal styling */
 .facet-modal-backdrop {
   position: fixed;
   inset: 0;
@@ -378,7 +362,7 @@ ul {
 }
 
 .facet-modal__header {
-  padding: 0.75rem 1rem;
+  padding: var(--cc-row-padding-y) var(--cc-row-padding-x);
 }
 
 .facet-modal__title {
@@ -387,40 +371,27 @@ ul {
 }
 
 .facet-modal-close {
-  border: none;
-  border-radius: 50px;
-  padding: 0;
   margin: 0;
-  background: var(--cc-color-surface-muted);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   position: absolute;
-  top: -15px;
-  right: -15px;
-  color: var(--cc-color-muted);
-}
-
-.facet-modal-close:hover {
-  outline: none;
-  background: var(--cc-color-surface);
+  top: calc(-1 * var(--cc-space-md));
+  right: calc(-1 * var(--cc-space-md));
 }
 
 .facet-modal__body {
-  padding: 0.75rem 1rem;
+  padding: var(--cc-row-padding-y) var(--cc-row-padding-x);
   overflow: auto;
   background: var(--cc-color-surface);
 }
 
 .facet-modal-search {
   width: 100%;
-  margin-bottom: 0.5rem;
-  border-radius: 3px;
+  margin-bottom: var(--cc-space-sm);
+  padding: var(--cc-space-xs) var(--cc-space-sm);
+  border-radius: var(--cc-radius-sm);
   border: 1px solid var(--cc-border-color-control);
   background: var(--cc-color-surface);
   color: var(--cc-color-text);
-  height: 30px;
+  min-height: calc(1.5em + 0.5rem + 2px);
 }
 
 .facet-modal-search::placeholder {
@@ -428,26 +399,10 @@ ul {
 }
 
 .facet-modal-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.facet-modal-list li {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 4px 0;
-  padding-right: 8px;
   color: var(--cc-color-text);
-  cursor: pointer;
 }
 
-.facet-modal-list li:hover {
-  background: var(--cc-color-surface);
-}
-
-.facet-modal-list li .facet-value {
+.facet-modal-list__item .facet-value {
   flex: 1;
 }
 

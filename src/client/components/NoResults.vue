@@ -53,18 +53,20 @@ const hasFilters = computed(() => activeCount.value > 0)
 </script>
 
 <style>
-.no-results { 
+.no-results {
   display: flex;
   flex-direction: column;
-  text-align: left; 
+  text-align: left;
   color: var(--cc-color-text);
 }
-.no-results-message { 
-  font-size: 1.5em; 
-  padding: 1em;
+
+.no-results-message {
+  font-size: var(--cc-font-size-lg);
+  padding: var(--cc-space-md);
 }
+
 .no-results h2 {
   margin-bottom: 0;
-  font-size: 1.2em;
+  font-size: var(--cc-font-size-lg);
 }
 </style>

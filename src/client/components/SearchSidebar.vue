@@ -119,20 +119,22 @@ function updateFilters(field, values) {
 
 <style scoped>
 .sidebar {
-  padding: 1rem;
+  padding: var(--cc-space-md);
   width: 400px;
   position: relative;
 }
+
 .sidebar--fixed {
   position: fixed;
   max-height: calc(100vh - 14rem);
   overflow-y: auto;
-  transition: top 0.25s ease-out; 
+  transition: top 0.25s ease-out;
 }
+
 .facet-group {
   display: block;
-  margin-bottom: 1rem;
+  margin-bottom: var(--cc-space-md);
   padding-left: 0;
-  color: black
+  color: var(--cc-color-text);
 }
 </style>
