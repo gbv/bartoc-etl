@@ -1,4 +1,4 @@
-/* BARTOC design tokens: colors, type, spacing, radii, and compatibility aliases. */
+/* BARTOC design tokens: colors, type, spacing, radii, and shadows. */
 :root {
   /* Shared coli-conc/BARTOC design tokens.
    * Keep these values aligned with bartoc.org/static/css/layout.css.
@@ -20,6 +20,7 @@
   --cc-color-surface: #fff;
   --cc-color-surface-muted: #fcfcfc;
   --cc-color-on-primary: #fff;
+  --cc-color-backdrop: rgba(0, 0, 0, 0.5);
   --cc-border-color: #ddd;
   --cc-border-color-control: #ced4da;
   --cc-border-color-strong: #adb5bd;
@@ -45,52 +46,4 @@
   --cc-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
   --cc-shadow-md: 0 2px 6px rgba(15, 23, 42, 0.08);
   --cc-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.25);
-
-  /* Basic colors */
-  --white: var(--cc-color-on-primary);
-  --white-mute: var(--cc-color-surface-muted);
-
-  --black: var(--cc-color-text);
-  --black-mute: var(--cc-color-text);
-
-  --red: var(--cc-color-primary);
-  --light-red: var(--cc-color-primary-hover);
-  --bright-red: var(--cc-color-primary-hover);
-
-  /* Background family around #F6F3F3 */
-  --bg-main: var(--cc-color-page);
-  --bg-soft: var(--cc-color-surface-muted);
-
-  /* Neutral button palette */
-  --btn-neutral: var(--cc-color-secondary);
-  --btn-neutral-hover: var(--cc-color-accent);
-
-  --color-text-light-1: var(--cc-color-text);
-  --color-text-light-2: var(--cc-color-muted);
-  --color-text-dark-1: var(--white);
-
-  --link-color: var(--cc-color-link);
-
-  /*  Semantic background variables using the bg-* family */
-  --color-background: var(--bg-main);
-  --color-background-soft: var(--bg-soft);
-
-  --color-border: var(--cc-border-color);
-  --color-border-hover: var(--cc-border-color-control);
-  --color-text: var(--color-text-light-1);
-
-  --color-button-background: var(--cc-color-primary);
-  --color-button-text: var(--cc-color-on-primary);
-  --color-button-hover: var(--cc-color-primary-hover);
-  --color-button-active: var(--cc-color-primary-hover);
-
-  /* Breadcrumb */
-  --color-breadcrumb-background: var(--cc-color-surface-muted);
-  --color-breadcrumb-border: var(--cc-border-color);
-  --color-breadcrumb-text: var(--cc-color-muted);
-
-  /* Extras useful for the modal / sidebar */
-  --color-surface: var(--cc-color-surface);
-  --color-surface-border: var(--cc-border-color);
-  --color-backdrop: rgba(0, 0, 0, 0.5);
 }

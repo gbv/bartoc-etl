@@ -27,7 +27,7 @@
   align-items: center;
   font-size: 1.5rem;
   font-weight: bold;
-  color: var(--color-text-light-1);
+  color: var(--cc-color-on-primary);
   text-decoration: none;
 }
 .header__nav {
@@ -57,11 +57,11 @@
 }
 
 .header__nav-right .user-status-dropdown {
-  color: var(--color-text-light-1);
+  color: var(--cc-color-text);
 }
 
 .header__nav-right .user-status-dropdown a {
-  color: var(--color-text-light-1);
+  color: var(--cc-color-text);
 }
 
 .header__nav-left {

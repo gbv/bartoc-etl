@@ -57,7 +57,7 @@ const hasFilters = computed(() => activeCount.value > 0)
   display: flex;
   flex-direction: column;
   text-align: left; 
-  color: var(--color-text);
+  color: var(--cc-color-text);
 }
 .no-results-message { 
   font-size: 1.5em; 

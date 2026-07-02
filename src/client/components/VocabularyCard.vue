@@ -221,10 +221,10 @@ const titleHref = computed(() => {
   margin: 12px 0;
   padding: 0.75rem 1rem;
   text-align: left;
-  color: var(--color-text);
+  color: var(--cc-color-text);
 
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-surface-border);
+  background-color: var(--cc-color-surface);
+  border: 1px solid var(--cc-border-color);
   border-radius: 6px;
 
   border-left-width: 3px;
@@ -242,9 +242,9 @@ const titleHref = computed(() => {
 }
 
 .result-card:hover {
-  background-color: var(--color-background-soft);
-  border-color: var(--color-border-hover);
-  border-left-color: var(--red);
+  background-color: var(--cc-color-surface-muted);
+  border-color: var(--cc-border-color-control);
+  border-left-color: var(--cc-color-primary);
   box-shadow: var(--cc-shadow-md);
   transform: translateY(-1px);
 }
@@ -252,12 +252,12 @@ const titleHref = computed(() => {
 .result-title {
   font-size: 1.1rem;
   margin: 4px 0 6px;
-  border-bottom: 1px dotted var(--color-border);
+  border-bottom: 1px dotted var(--cc-border-color);
   padding-bottom: 2px;
 }
 
 .result-title a {
-  color: var(--red);
+  color: var(--cc-color-primary);
   font-weight: 600;
 }
 
@@ -269,7 +269,7 @@ const titleHref = computed(() => {
 .result-description {
   font-size: 0.9rem;
   margin: 0.35rem 0.3rem;
-  color: var(--color-text-light-2);
+  color: var(--cc-color-muted);
 }
 
 .result-details {
@@ -292,21 +292,21 @@ const titleHref = computed(() => {
 .kos-type-info {
   display: inline-flex;
   align-items: center;
-  color: var(--color-text-light-2);
+  color: var(--cc-color-muted);
   cursor: help;
 }
 
 .kos-type-info:focus-visible {
-  outline: 2px solid var(--red);
+  outline: 2px solid var(--cc-color-primary);
   outline-offset: 2px;
 }
 
 .result-metadata {
-  border-top: 1px dotted var(--color-border);
+  border-top: 1px dotted var(--cc-border-color);
   font-size: 0.8rem;
   padding: 0.25rem 0;
   margin-top: 0.25rem;
-  color: var(--color-text-light-2);
+  color: var(--cc-color-muted);
 }
 
 .result-metadata * {

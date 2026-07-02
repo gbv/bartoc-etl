@@ -75,7 +75,7 @@
                   size="40"
                   stroke-width="3"
                   aria-hidden="true"
-                  stroke="var(--red)" />
+                  stroke="var(--cc-color-primary)" />
               </button>
             </header>
 
@@ -236,22 +236,22 @@ ul {
 }
 
 .facet-badge {
-  background: var(--color-button-background);
-  color: white;
+  background: var(--cc-color-primary);
+  color: var(--cc-color-on-primary);
   padding: 0 0.5em;
   font-size: 0.75em;
   margin-left: 0.5em;
 }
 
 .arrow {
-  color: white;
+  color: var(--cc-color-on-primary);
   position: relative;  
   content: "";
   display: inline-block;
   width: 8px;
   height: 8px;
-  border-right: 0.2em solid var(--color-button-text);;
-  border-top: 0.2em solid var(--color-button-text);;
+  border-right: 0.2em solid var(--cc-color-on-primary);
+  border-top: 0.2em solid var(--cc-color-on-primary);
   transform: rotate(135deg);
 }
 
@@ -295,14 +295,14 @@ ul {
 }
 
 .options-list li:hover {
-  background-color: var(--color-background-soft);
-  color: var(--color-text-light-2);
+  background-color: var(--cc-color-surface-muted);
+  color: var(--cc-color-muted);
 }
 
 /* highlight facet-count on li hover */
 .options-list li:hover .facet-count {
-  background-color: var(--color-background);
-  color: var(--color-text-light-1);
+  background-color: var(--cc-color-page);
+  color: var(--cc-color-text);
 }
 
 .facet-count {
@@ -323,7 +323,7 @@ ul {
   background: none;
   border: none;
   padding: 0;
-  color: var(--link-color);
+  color: var(--cc-color-link);
   cursor: pointer;
   text-decoration: none;
   padding-left: 4px; /* visual alignment with facet values */
@@ -334,7 +334,7 @@ ul {
 .facet-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: var(--color-backdrop);
+  background: var(--cc-color-backdrop);
   z-index: 50;
 }
 
@@ -343,7 +343,7 @@ ul {
   top: 15vh;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--white-mute); 
+  background: var(--cc-color-surface-muted);
   max-width: 800px;
   width: 100%;
   max-height: 80vh;
@@ -391,7 +391,7 @@ ul {
   border-radius: 50px;
   padding: 0;
   margin: 0;
-  background: var(--white-mute);
+  background: var(--cc-color-surface-muted);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -404,13 +404,13 @@ ul {
 
 .facet-modal-close:hover {
   outline: none;
-  background: var(--white);
+  background: var(--cc-color-surface);
 }
 
 .facet-modal__body {
   padding: 0.75rem 1rem;
   overflow: auto;
-  background: var(--color-surface);
+  background: var(--cc-color-surface);
 }
 
 .facet-modal-search {
@@ -418,8 +418,8 @@ ul {
   margin-bottom: 0.5rem;
   border-radius: 3px;
   border: 1px solid var(--cc-border-color-control);
-  background: var(--white);
-  color: var(--color-text-light-1);
+  background: var(--cc-color-surface);
+  color: var(--cc-color-text);
   height: 30px;
 }
 
@@ -439,12 +439,12 @@ ul {
   gap: 0.5rem;
   padding: 4px 0;
   padding-right: 8px;
-  color: var(--color-text-light-1);
+  color: var(--cc-color-text);
   cursor: pointer;
 }
 
 .facet-modal-list li:hover {
-  background: var(--white);
+  background: var(--cc-color-surface);
 }
 
 .facet-modal-list li .facet-value {

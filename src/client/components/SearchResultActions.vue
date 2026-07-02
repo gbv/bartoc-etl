@@ -114,7 +114,7 @@ function printPage() {
 .search-result-actions__summary {
   font-size: 14px;
   font-weight: 500;
-  color: var(--color-breadcrumb-text);
+  color: var(--cc-color-muted);
 }
 
 .search-result-actions__buttons {

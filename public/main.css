@@ -21,8 +21,8 @@
   font-weight: var(--cc-font-weight-light);
 
   color-scheme: light;
-  color: var(--color-text);
-  background-color: var(--color-background);
+  color: var(--cc-color-text);
+  background-color: var(--cc-color-page);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -39,8 +39,8 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  background-color: var(--color-background);
-  color: var(--color-text);
+  background-color: var(--cc-color-page);
+  color: var(--cc-color-text);
 }
 
 #app {
@@ -76,7 +76,7 @@ header {
 /* Base elements */
 a {
   font-weight: 500;
-  color: var(--link-color);
+  color: var(--cc-color-link);
   text-decoration: none;
 }
 
@@ -388,14 +388,14 @@ h1 {
   }
 
   body.print-search-results {
-    color: var(--black);
-    background: var(--white);
+    color: var(--cc-color-text);
+    background: var(--cc-color-surface);
   }
 
   .header {
     position: static;
-    color: var(--black);
-    background: var(--white);
+    color: var(--cc-color-text);
+    background: var(--cc-color-surface);
     box-shadow: none;
   }
 
@@ -422,8 +422,8 @@ h1 {
   footer {
     margin-top: 0.75rem;
     padding: 0.35rem 0 0;
-    color: var(--black);
-    background: var(--white);
+    color: var(--cc-color-text);
+    background: var(--cc-color-surface);
     text-align: left;
     border-top: 1px solid var(--cc-border-color-strong);
   }
@@ -514,8 +514,8 @@ h1 {
     page-break-inside: avoid;
     margin: 0 0 0.35rem;
     padding: 0.25rem 0 0.35rem;
-    color: var(--black);
-    background: var(--white);
+    color: var(--cc-color-text);
+    background: var(--cc-color-surface);
     border: 0;
     border-radius: 0;
     box-shadow: none;
@@ -531,7 +531,7 @@ h1 {
   }
 
   body.print-search-results .result-title a {
-    color: var(--black);
+    color: var(--cc-color-text);
   }
 
   body.print-search-results .result-description {

@@ -15,7 +15,7 @@
 }
 
 .search-sort label {
-  color: var(--color-text-light-1);
+  color: var(--cc-color-text);
   font-size: 15px;
 }
 
@@ -30,6 +30,6 @@
 
 .badges-title {
   font-weight: 600;
-  color: var(--color-text-light-1);
+  color: var(--cc-color-text);
   width: 200px;
 }

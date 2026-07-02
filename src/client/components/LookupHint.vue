@@ -90,7 +90,7 @@ const showBartocOnly = computed(() => {
 
 <style scoped>
 .lookup-message {
-  color: var(--black);
+  color: var(--cc-color-text);
   display: flex;
   justify-content: center;
   padding: 12px;
