@@ -27,7 +27,7 @@
     <div
       v-if="badges.length > 0"
       class="search-filters">
-      <div class="badges__wrapper">
+      <div class="action-group badges__wrapper">
         <FilterBadge
           v-for="badge in badges"
           :key="badge.key"
@@ -35,7 +35,7 @@
           :value="badge.value"
           @remove-badge="onRemoveBadge(badge)" />
         <button
-          class="button noprint"
+          class="cc-button cc-button-danger noprint"
           :aria-label="`Clear Filters`"
           type="button"
           @click="emit('clear-filters')">

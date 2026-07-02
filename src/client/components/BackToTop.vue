@@ -42,7 +42,7 @@ onBeforeUnmount(() => {
   <button
     v-if="isVisible"
     type="button"
-    class="back-to-top noprint"
+    class="cc-button cc-button-primary cc-button-icon back-to-top noprint"
     aria-label="Back to top"
     @click="scrollToTop">
     <vue-feather
@@ -63,10 +63,8 @@ onBeforeUnmount(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: none;
-  cursor: pointer;
 
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--cc-shadow-lg);
 
   /* small appear animation */
   opacity: 1;
@@ -79,7 +77,6 @@ onBeforeUnmount(() => {
 /* optional hover/focus style */
 .back-to-top:hover,
 .back-to-top:focus-visible {
-  background: var(--gray-300);
-  outline: none;
+  outline-offset: 2px;
 }     
 </style>

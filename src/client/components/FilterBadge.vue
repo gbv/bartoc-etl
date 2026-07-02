@@ -7,7 +7,7 @@
       <span class="filter-badge__value">{{ displayValue }}</span>
     </span>
     <button
-      class="filter-badge__close noprint"
+      class="cc-button cc-button-ghost cc-button-sm cc-button-icon filter-badge__close noprint"
       :aria-label="`Remove Badge ${label}: ${displayValue}`"
       type="button"
       @click="emit('remove-badge')" />
@@ -32,33 +32,28 @@ const displayValue = computed(() => (props.value === "-" ? "No value" : props.va
 .filter-badge {
   display: inline-flex;
   align-items: center;
-  padding: 6px;
-  color: var(--color-text-light-1);
-  font-size: 15px;
-  margin-right: 12px;
+  padding: var(--cc-space-xs) 0;
+  color: var(--cc-color-text);
+  font-size: var(--cc-font-size-sm);
+  margin-right: 0;
   text-transform: capitalize;
 }
 .filter-badge__label { 
     margin-right: 8px;
 }
 .filter-badge__value { 
-    font-weight: 600;
+    font-weight: var(--cc-font-weight-regular);
     margin-right: 8px;
 }
 .filter-badge__close {
-  appearance: none;
-  border: 0;
   text-align: center;
-  cursor: pointer;
-  padding: 0;
 }
-.filter-badge__close:hover { 
-    background: #d1d5db; 
+.filter-badge__close:hover {
+    background: var(--cc-color-accent);
 }
 
 .filter-badge__close::before {
   content: "x";
-  padding: 12px
 }
 
 </style>

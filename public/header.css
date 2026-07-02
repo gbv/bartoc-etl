@@ -1,13 +1,13 @@
 .header {
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  background: var(--red);
+  box-shadow: var(--cc-shadow-sm);
+  background: var(--cc-color-primary);
   position: sticky;
   top: 0;
   z-index: 100;
-  color: var(--color-text-light-1);
+  color: var(--cc-color-on-primary);
 }
 .header__container {
-  width: 1320px;
+  width: min(1320px, calc(100% - 32px));
   height: 60px;
   margin: 0 auto;
   display: flex;               
@@ -45,14 +45,14 @@
 }
 
 .header__nav-right .user-status > a {
-  color: var(--gray-300);
+  color: var(--cc-color-accent);
   font-size: 16px;
   font-weight: normal;
   padding: 0;
 }
 
 .header__nav-right .user-status > a:hover {
-  color: var(--white-mute);
+  color: var(--cc-color-accent);
   text-decoration: underline;
 }
 
@@ -71,14 +71,14 @@
 
 .header__nav-left a, 
 .header__nav-right a {
-  color: var(--color-text-light-1);
+  color: var(--cc-color-accent);
   text-decoration: none;
   font-size: 1rem;
   transition: color 0.2s;
 }
 
 .header__logo-text {
-  color: var(--gray-300);
+  color: var(--cc-color-accent);
   font-size: 16px;
 }
 
@@ -86,25 +86,30 @@
 .header__nav-right > a:hover  {
   text-decoration: underline;
   background-color: transparent;
-  color: var(--white-mute);
+  color: var(--cc-color-accent);
 }
 
 .header__add-button { 
-  background-color: var(--white-mute);
-  color: var(--red);
-  padding: 0.25rem 0.75rem;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: bold;
-  text-decoration: none;
+  flex: none;
 }
 
 .header__nav-right > a.header__add-button,
 .header__nav-right > a.header__add-button:hover,
 .header__nav-right > a.header__add-button:focus-visible {
-  background-color: var(--white);
-  color: var(--red);
   text-decoration: none;
+}
+
+.header__nav-right > a.header__add-button {
+  border-color: var(--cc-color-on-primary);
+  background: var(--cc-color-on-primary);
+  color: var(--cc-color-primary);
+}
+
+.header__nav-right > a.header__add-button:hover,
+.header__nav-right > a.header__add-button:focus-visible {
+  border-color: var(--cc-color-accent);
+  background: var(--cc-color-accent);
+  color: var(--cc-color-primary);
 }
 
 @media (max-width: 768px) {

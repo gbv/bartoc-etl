@@ -223,15 +223,15 @@ const titleHref = computed(() => {
   text-align: left;
   color: var(--color-text);
 
-  background-color: var(--color-surface);            /* #f8f9fa */
-  border: 1px solid var(--color-surface-border);     /* #e9ecef */
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-surface-border);
   border-radius: 6px;
 
   border-left-width: 3px;
   border-left-style: solid;
   border-left-color: transparent;
 
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  box-shadow: var(--cc-shadow-sm);
 
   transition:
     background-color 120ms ease-out,
@@ -245,7 +245,7 @@ const titleHref = computed(() => {
   background-color: var(--color-background-soft);
   border-color: var(--color-border-hover);
   border-left-color: var(--red);
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08);
+  box-shadow: var(--cc-shadow-md);
   transform: translateY(-1px);
 }
 
@@ -314,7 +314,7 @@ const titleHref = computed(() => {
 }
 
 .highlighted {
-  background: #fffbcc;
-  color: #000;
+  background: var(--cc-color-highlight);
+  color: var(--cc-color-text);
 }
 </style>

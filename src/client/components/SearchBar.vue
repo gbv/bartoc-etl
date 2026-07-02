@@ -24,7 +24,7 @@
       </option>
     </select>
     <button
-      class="button noprint" 
+      class="cc-button cc-button-primary noprint"
       @click="onSearch">
       Search
     </button>

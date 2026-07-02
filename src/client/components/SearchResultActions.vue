@@ -6,30 +6,30 @@
       {{ formattedSummary }}
     </span>
 
-    <div class="search-result-actions__buttons noprint">
+    <div class="action-group search-result-actions__buttons noprint">
       <button
         v-if="canLoadMore"
-        class="button search-result-actions__button"
+        class="cc-button cc-button-primary search-result-actions__button"
         type="button"
         @click="emit('load-more')">
         More
       </button>
       <button
         v-if="canLoadMore"
-        class="button search-result-actions__button"
+        class="cc-button cc-button-primary search-result-actions__button"
         type="button"
         @click="emit('show-all')">
         All
       </button>
       <button
-        class="button search-result-actions__button search-result-actions__print"
+        class="cc-button cc-button-primary search-result-actions__button search-result-actions__print"
         type="button"
         @click="printPage">
         Print
       </button>
       <a
         v-if="downloadUrl"
-        class="button search-result-actions__button"
+        class="cc-button cc-button-primary search-result-actions__button"
         :href="downloadUrl"
         download="bartoc-search-results.jskos.json"
         type="application/json">
@@ -118,23 +118,16 @@ function printPage() {
 }
 
 .search-result-actions__buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
   justify-content: flex-end;
 }
 
 .search-result-actions__button {
-  display: inline-flex;
-  align-items: center;
-  min-height: 42px;
   margin: 0;
 }
 
-.search-result-actions a.button,
-.search-result-actions a.button:hover,
-.search-result-actions a.button:focus {
-  color: var(--color-button-text, var(--color-text-dark-1));
+.search-result-actions a.cc-button,
+.search-result-actions a.cc-button:hover,
+.search-result-actions a.cc-button:focus {
   text-decoration: none;
 }
 

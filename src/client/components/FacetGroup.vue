@@ -1,7 +1,7 @@
 <template>
   <div>
     <button
-      class="facet-item" 
+      class="cc-button cc-button-primary facet-item"
       type="button"
       :aria-expanded="open"
       @click="toggleOpen">
@@ -230,7 +230,7 @@ ul {
   display: flex;
   width: 100%;
   padding: 0.5rem;
-  border-radius: 0;
+  border-radius: var(--cc-radius-md);
   text-align: inherit;
   justify-content: space-between;
 }
@@ -349,7 +349,7 @@ ul {
   max-height: 80vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--cc-shadow-lg);
 }
 
 .facet-modal-enter-active,
@@ -383,7 +383,7 @@ ul {
 
 .facet-modal__title {
   margin: 0;
-  color: var(--gray-800);
+  color: var(--cc-color-text);
 }
 
 .facet-modal-close {
@@ -399,8 +399,8 @@ ul {
   position: absolute;
   top: -15px;
   right: -15px;
-  color: var(--gray-700);
-}  
+  color: var(--cc-color-muted);
+}
 
 .facet-modal-close:hover {
   outline: none;
@@ -417,14 +417,14 @@ ul {
   width: 100%;
   margin-bottom: 0.5rem;
   border-radius: 3px;
-  border: 1px solid var(--gray-300);
+  border: 1px solid var(--cc-border-color-control);
   background: var(--white);
   color: var(--color-text-light-1);
   height: 30px;
 }
 
 .facet-modal-search::placeholder {
-  color: var(--gray-500);
+  color: var(--cc-color-muted);
 }
 
 .facet-modal-list {

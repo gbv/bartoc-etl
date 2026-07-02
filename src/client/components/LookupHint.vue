@@ -96,7 +96,7 @@ const showBartocOnly = computed(() => {
   padding: 12px;
 }
 .lookup-message__uri {
-  background: #ff9;
+  background: var(--cc-color-highlight-strong);
   margin-right: 5px;
 }
 .lookup-message__name {

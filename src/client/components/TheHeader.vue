@@ -34,7 +34,7 @@
           <UserStatus redirect />
           <a
             v-if="userCanAdd"
-            class="header__add-button"
+            class="cc-button cc-button-on-primary header__add-button"
             :href="editUrl">
             Add
           </a>

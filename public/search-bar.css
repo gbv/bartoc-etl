@@ -16,10 +16,6 @@
   min-width: 8rem;
 }
 
-.search-bar__wrapper .button {
-  min-width: 6rem;
-}
-
 @media (max-width: 700px) {
   .search-bar__wrapper {
     flex-direction: column;
@@ -28,7 +24,7 @@
 
   .search-bar__wrapper input,
   .search-bar__wrapper select,
-  .search-bar__wrapper .button {
+  .search-bar__wrapper .cc-button {
     width: 100%;
   }
 }
