@@ -43,7 +43,7 @@
             class="facet-show-more">
             <button
               type="button"
-              class="inline-action facet-show-more__button"
+              class="cc-button"
               @click.stop="openModal">
               see all {{ valuesRef.length }}
             </button>
@@ -307,10 +307,6 @@ function onRow(value) {
 
 .facet-show-more {
   padding-top: var(--cc-row-gap);
-}
-
-.facet-show-more__button {
-  width: 100%;
 }
 
 .facet-modal-backdrop {

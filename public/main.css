@@ -175,7 +175,6 @@ h1 {
 }
 
 .cc-button,
-.inline-action,
 .button {
   display: inline-flex;
   align-items: center;
@@ -205,9 +204,6 @@ h1 {
 .cc-button:hover,
 .cc-button:focus,
 .cc-button:focus-visible,
-.inline-action:hover,
-.inline-action:focus,
-.inline-action:focus-visible,
 .button:hover,
 .button:focus,
 .button:focus-visible {
@@ -218,8 +214,6 @@ h1 {
 
 .cc-button:disabled,
 .cc-button[aria-disabled="true"],
-.inline-action:disabled,
-.inline-action[aria-disabled="true"],
 .button:disabled,
 .button[aria-disabled="true"] {
   opacity: 0.55;
@@ -363,9 +357,6 @@ h1 {
   align-items: center;
   gap: var(--cc-row-gap);
   padding: var(--cc-row-padding-y) var(--cc-row-padding-x);
-  border: 1px solid var(--cc-border-color-strong);
-  border-radius: var(--cc-radius-md);
-  background: var(--cc-color-surface);
 }
 
 .selected-row {
