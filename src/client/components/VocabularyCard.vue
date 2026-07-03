@@ -30,10 +30,9 @@
                 :aria-label="`${type.label}: ${type.description}`"
                 :title="type.description"
                 tabindex="0">
-                <vue-feather
-                  aria-hidden="true"
-                  size="22"
-                  type="info" />
+                <font-awesome-icon
+                  icon="info-circle"
+                  size="xl" />
               </span>
             </span><span v-if="index < typeItems.length - 1">, </span>
           </template>

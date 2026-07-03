@@ -45,11 +45,9 @@ onBeforeUnmount(() => {
     class="cc-button cc-button-primary cc-button-icon back-to-top noprint"
     aria-label="Back to top"
     @click="scrollToTop">
-    <vue-feather
-      type="chevron-up"
-      size="22"
-      stroke-width="2"
-      aria-hidden="true" />
+    <font-awesome-icon
+      icon="chevron-up"
+      size="xl" />
   </button>
 </template>
 

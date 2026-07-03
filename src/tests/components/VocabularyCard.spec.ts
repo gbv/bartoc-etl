@@ -11,8 +11,8 @@ const {
   setKosTypeDefinitions,
 } = kosTypeDefinitions
 
-const vueFeatherStub = {
-  props: ["type", "size"],
+const fontAwesomeIconStub = {
+  props: ["icon", "size"],
   template: "<span class=\"icon-stub\" />",
 }
 
@@ -30,7 +30,7 @@ function mountVocabularyCard(doc = {}) {
     },
     global: {
       stubs: {
-        "vue-feather": vueFeatherStub,
+        "font-awesome-icon": fontAwesomeIconStub,
       },
     },
   })

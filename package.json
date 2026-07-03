@@ -87,18 +87,19 @@
     "eslint": "^9.24.0"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^7.3.0",
+    "@fortawesome/free-solid-svg-icons": "^7.3.0",
+    "@fortawesome/vue-fontawesome": "^3.3.0",
     "bullmq": "^5.53.2",
     "compression": "^1.8.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
-    "feather-icons": "^4.29.2",
     "gbv-login-client-vue": "^1.0.0",
     "jskos-vue": "^0.3.18",
     "jsonschema": "^1.5.0",
     "morgan": "^1.10.0",
     "namespace-lookup": "^0.2.1",
     "sirv": "^3.0.1",
-    "vue": "^3.5.25",
-    "vue-feather": "^2.0.0"
+    "vue": "^3.5.25"
   }
 }

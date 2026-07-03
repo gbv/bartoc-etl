@@ -72,12 +72,10 @@
                 class="cc-button cc-button-ghost cc-button-icon facet-modal-close"
                 aria-label="Close"
                 @click="closeModal">
-                <vue-feather
-                  type="x-circle"
-                  size="40"
-                  stroke-width="3"
-                  aria-hidden="true"
-                  stroke="var(--cc-color-primary)" />
+                <font-awesome-icon
+                  icon="times-circle"
+                  size="2x"
+                  aria-hidden="true" />
               </button>
             </header>
 
@@ -375,6 +373,13 @@ function onRow(value) {
   position: absolute;
   top: calc(-1 * var(--cc-space-md));
   right: calc(-1 * var(--cc-space-md));
+  color: var(--cc-color-primary);
+}
+
+.facet-modal-close:hover,
+.facet-modal-close:focus,
+.facet-modal-close:focus-visible {
+  color: var(--cc-color-primary);
 }
 
 .facet-modal__body {
