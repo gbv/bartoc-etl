@@ -74,7 +74,7 @@
                 @click="closeModal">
                 <font-awesome-icon
                   icon="times-circle"
-                  size="2x"
+                  size="3x"
                   aria-hidden="true" />
               </button>
             </header>
@@ -368,8 +368,9 @@ function onRow(value) {
   margin: 0;
   position: absolute;
   top: calc(-1 * var(--cc-space-md));
-  right: calc(-1 * var(--cc-space-md));
+  right: calc(-1 * var(--cc-space-sm));
   color: var(--cc-color-primary);
+  border: none;
 }
 
 .facet-modal-close:hover,
