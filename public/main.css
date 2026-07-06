@@ -1,6 +1,4 @@
 /* Imports */
-@import './design-tokens.css';
-@import './footer.css';
 @import './header.css';
 @import './home.css';
 @import './search.css';
@@ -408,21 +406,6 @@ h1 {
     font-size: 16px;
     font-weight: 700;
     line-height: 1.2;
-  }
-
-  footer {
-    margin-top: 0.75rem;
-    padding: 0.35rem 0 0;
-    color: var(--cc-color-text);
-    background: var(--cc-color-surface);
-    text-align: left;
-    border-top: 1px solid var(--cc-border-color-strong);
-  }
-
-  .print-footer {
-    margin: 0;
-    font-size: 10px;
-    line-height: 1.25;
   }
 
   body.print-search-results #app {

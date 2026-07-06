@@ -1,53 +1,68 @@
 <template>
-  <footer>
-    <div class="noprint">
+  <BartocFooter
+    site-name="BARTOC.org"
+    api-url="/api/"
+    download-url="/download"
+    :external-links="externalLinks"
+    :search-status-links="searchStatusLinks">
+    <template #search-status>
       <span v-if="apiStatus.solr.connected">
         search in <b>{{ apiStatus.solr.indexedRecords }}</b> terminologies
         (as of <b>{{ apiStatus.solr.lastIndexedAt }}</b>,
-        live updates <b>{{ apiStatus.jskosServer.connected ? 'enabled' : 'disabled' }}</b>)
+        live updates
+        <b>{{ apiStatus.jskosServer.connected ? "enabled" : "disabled" }}</b>)
       </span>
       <span v-else>
         Search index not available!
       </span>
-      <a :href="`${baseUrl}api/status`">Search API</a>
-      |
-      <a href="https://github.com/gbv/bartoc-search">sources</a>
-    </div>
-    <p class="noprint">
-      BARTOC.org vocabulary metadata is <a href="/download">made available</a> under the <a href="http://www.opendatacommons.org/licenses/pddl/1.0/">PDDL 1.0</a>
-    </p>
-    <div class="noprint">
-      <a href="/api/">JSKOS API</a>
-      |
-      <a
-        rel="me"
-        href="https://code4lib.social/@bartoc">Mastodon</a>
-      |        
-      <a href="https://github.com/gbv/bartoc.org">sources</a>
-      |
-      <a href="https://github.com/gbv/bartoc.org/issues">issues</a>
-    </div>
-    <p class="print-footer printonly">
-      BARTOC.org vocabulary metadata is made available under the PDDL 1.0.
-    </p>
-  </footer>
+    </template>
+  </BartocFooter>
 </template>
 
 <script setup>
 import { reactive, onMounted } from "vue"
 import axios from "axios"
+import { BartocFooter } from "@gbv/bartoc-components"
+const baseUrl = import.meta.env.BASE_URL || "/"
 
-const baseUrl = import.meta.env.BASE_URL
-const apiStatus = reactive({ solr: {}, jskosServer: {} })
+const apiStatus = reactive({
+  solr: {},
+  jskosServer: {},
+})
+
+const searchStatusLinks = [
+  {
+    href: `${baseUrl}api/status`,
+    label: "Search API",
+  },
+  {
+    href: "https://github.com/gbv/bartoc-search",
+    label: "sources",
+  },
+]
+
+const externalLinks = [
+  {
+    href: "https://code4lib.social/@bartoc",
+    label: "Mastodon",
+    rel: "me",
+  },
+  {
+    href: "https://github.com/gbv/bartoc.org",
+    label: "sources",
+  },
+  {
+    href: "https://github.com/gbv/bartoc.org/issues",
+    label: "issues",
+  },
+]
 
 onMounted(async () => {
-  axios
-    .get(`${baseUrl}api/status`)
-    .then((res) => {
-      Object.assign(apiStatus, res.data)
-    })
-    .catch((e) => {
-      console.warn("Failed to fetch API status" + e)
-    })
+  try {
+    const res = await axios.get(`${baseUrl}api/status`)
+    Object.assign(apiStatus, res.data)
+  } catch (error) {
+    console.warn(`Failed to fetch API status: ${error}`)
+  }
 })
 </script>
