@@ -1,39 +1,15 @@
 <template>
-  <div class="search-bar__wrapper">
-    <input
-      v-model="search"
-      type="text"
-      placeholder="Search terminology..."
-      @input="lookupUri"
-      @keydown.enter="onSearch">
-    <select v-model="field">
-      <option value="">
-        All fields
-      </option>
-      <option value="title_search">
-        Title
-      </option>
-      <option value="publisher_en">
-        Publisher
-      </option>
-      <option value="subject_notation">
-        Subject notation
-      </option>
-      <option value="subject_uri">
-        Subject URI
-      </option>
-    </select>
-    <button
-      class="cc-button cc-button-primary noprint"
-      @click="onSearch">
-      Search
-    </button>
-  </div>
+  <BartocSearchBar
+    v-model:search="search"
+    v-model:field="field"
+    class="search-bar"
+    @submit="onSearch" />
 </template>
 
 <script setup lang="js">
 import { ref, onMounted, inject, watch } from "vue"
 import { useRoute } from "vue-router"
+import { BartocSearchBar } from "@gbv/bartoc-components"
 const namespaces = inject("namespaces")
 
 /**
@@ -59,11 +35,11 @@ watch(
     search.value = queryValue(route.query.search)
     field.value = queryValue(route.query.field)
     limit.value = queryValue(route.query.limit, "10")
-
-    lookupUri()
   },
   { immediate: true },
 )
+
+watch(search, lookupUri, { immediate: true })
 
 function queryValue(value, fallback = "") {
   if (Array.isArray(value)) {
@@ -73,22 +49,29 @@ function queryValue(value, fallback = "") {
   return value?.toString() || fallback
 }
 
-async function onSearch() {
-  const query = { search: search.value.trim() }
-  if (field.value) {
-    query.field = field.value
-  }
+function onSearch(query = currentQuery()) {
+  const searchQuery = { ...query }
+
   if (limit.value) {
-    query.limit = limit.value
-  } 
-  
-  emit("search", query)
+    searchQuery.limit = limit.value
+  }
+
+  emit("search", searchQuery)
 }
 
 if (props.searchOnMounted) {
-  onMounted(onSearch)
+  onMounted(() => onSearch())
 }
 
+function currentQuery() {
+  const query = { search: search.value.trim() }
+
+  if (field.value) {
+    query.field = field.value
+  }
+
+  return query
+}
 
 function lookupUri() {
   const q = (search.value || "").trim()
@@ -98,7 +81,6 @@ function lookupUri() {
 
   const name = namespaces?.lookup?.(q)
   return emit("lookupUri", name ? { uri: q, name } : {})
-
 }
 
 function isHttpUrl(v) {
@@ -109,8 +91,7 @@ function isHttpUrl(v) {
     const u = new URL(v.trim())
     return u.protocol === "http:" || u.protocol === "https:"
   } catch {
-    return false 
+    return false
   }
 }
-
 </script>

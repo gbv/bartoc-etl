@@ -3,14 +3,20 @@ export function buildSearchBarQuery(routeQuery = {}, query = {}, filterParams = 
 
   delete base.filter
   delete base.start
+  delete base.field
 
-  return {
+  const nextQuery = {
     ...base,
     search: query?.search ?? base.search ?? "",
-    field: query?.field ?? "",
     limit: String(pageSize),
     ...(filterParams.length ? { filter: filterParams } : {}),
   }
+
+  if (query?.field) {
+    nextQuery.field = query.field
+  }
+
+  return nextQuery
 }
 
 export function buildQueryWithFilters(routeQuery = {}, filterParams = [], limit = 10) {

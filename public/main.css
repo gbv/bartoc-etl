@@ -2,7 +2,6 @@
 @import './header.css';
 @import './home.css';
 @import './search.css';
-@import './search-bar.css';
 @import './search-controls.css';
 
 /* Global reset */
@@ -21,6 +20,7 @@
   color-scheme: light;
   color: var(--cc-color-text);
   background-color: var(--cc-color-page);
+  --cc-container-max-width: 1320px;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -65,12 +65,6 @@ header {
   margin-bottom: var(--cc-space-lg);
 }
 
-/* Reusable page container */
-.app-container {
-  width: min(1320px, calc(100% - 32px));
-  margin-inline: auto;
-}
-
 /* Base elements */
 a {
   font-weight: 500;
@@ -102,10 +96,6 @@ h1 {
   text-decoration: none;
   outline: none;
   box-shadow: none;
-}
-
-.printonly {
-  display: none !important;
 }
 
 /* Shared coli-conc/BARTOC UI patterns from bartoc.org. */
@@ -172,183 +162,6 @@ h1 {
   gap: var(--cc-space-sm);
 }
 
-.cc-button,
-.button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: calc(1.5em + 0.75rem + 2px);
-  padding: 0.375rem 0.75rem;
-  border: 1px solid var(--cc-border-color-strong);
-  border-radius: var(--cc-radius-md);
-  background: var(--cc-color-surface);
-  color: var(--cc-color-link);
-  font-size: var(--cc-font-size-base);
-  font-weight: var(--cc-font-weight-light);
-  line-height: 1.5;
-  text-decoration: none;
-  appearance: none;
-  cursor: pointer;
-  user-select: none;
-  vertical-align: middle;
-  white-space: nowrap;
-  transition:
-    color 0.15s ease-in-out,
-    background-color 0.15s ease-in-out,
-    border-color 0.15s ease-in-out,
-    box-shadow 0.15s ease-in-out;
-}
-
-.cc-button:hover,
-.cc-button:focus,
-.cc-button:focus-visible,
-.button:hover,
-.button:focus,
-.button:focus-visible {
-  background: var(--cc-color-accent);
-  color: var(--cc-color-primary);
-  text-decoration: none;
-}
-
-.cc-button:disabled,
-.cc-button[aria-disabled="true"],
-.button:disabled,
-.button[aria-disabled="true"] {
-  opacity: 0.55;
-  pointer-events: none;
-}
-
-.cc-button-primary {
-  border-color: var(--cc-color-primary);
-  background: var(--cc-color-primary);
-  color: var(--cc-color-on-primary);
-}
-
-.cc-button-primary:hover,
-.cc-button-primary:focus,
-.cc-button-primary:focus-visible {
-  border-color: var(--cc-color-primary-hover);
-  background: var(--cc-color-primary-hover);
-  color: var(--cc-color-on-primary);
-}
-
-.cc-button-secondary {
-  border-color: var(--cc-border-color-strong);
-  background: var(--cc-color-surface);
-  color: var(--cc-color-text);
-}
-
-.cc-button-secondary:hover,
-.cc-button-secondary:focus,
-.cc-button-secondary:focus-visible {
-  border-color: var(--cc-color-primary);
-  background: var(--cc-color-accent);
-  color: var(--cc-color-primary);
-}
-
-.cc-button-action {
-  border-color: var(--cc-color-primary);
-  background: var(--cc-color-accent);
-  color: var(--cc-color-primary);
-}
-
-.cc-button-action:hover,
-.cc-button-action:focus,
-.cc-button-action:focus-visible {
-  border-color: var(--cc-color-primary-hover);
-  background: var(--cc-color-primary);
-  color: var(--cc-color-on-primary);
-}
-
-.cc-button-selected {
-  border-color: var(--cc-color-primary);
-  background: var(--cc-color-accent);
-  color: var(--cc-color-primary);
-}
-
-.cc-button-danger {
-  border-color: var(--cc-color-danger);
-  background: var(--cc-color-danger);
-  color: var(--cc-color-on-primary);
-}
-
-.cc-button-danger:hover,
-.cc-button-danger:focus,
-.cc-button-danger:focus-visible {
-  border-color: var(--cc-color-danger-hover);
-  background: var(--cc-color-danger-hover);
-  color: var(--cc-color-on-primary);
-}
-
-.cc-button-on-primary {
-  border-color: var(--cc-color-on-primary);
-  background: var(--cc-color-on-primary);
-  color: var(--cc-color-primary);
-}
-
-.cc-button-on-primary:hover,
-.cc-button-on-primary:focus,
-.cc-button-on-primary:focus-visible {
-  border-color: var(--cc-color-accent);
-  background: var(--cc-color-accent);
-  color: var(--cc-color-primary);
-}
-
-.cc-button-ghost {
-  border-color: var(--cc-border-color-strong);
-  background: transparent;
-  color: var(--cc-color-muted);
-}
-
-.cc-button-ghost:hover,
-.cc-button-ghost:focus,
-.cc-button-ghost:focus-visible {
-  background: transparent;
-  color: var(--cc-color-muted);
-}
-
-.cc-button-sm {
-  min-height: calc(1.5em + 0.5rem + 2px);
-  padding: 0.25rem 0.5rem;
-  font-size: var(--cc-font-size-sm);
-  line-height: 1.5;
-}
-
-.cc-button-icon {
-  width: calc(1.5em + 0.75rem + 2px);
-  min-width: calc(1.5em + 0.75rem + 2px);
-  padding-right: 0;
-  padding-left: 0;
-}
-
-.cc-button-sm.cc-button-icon {
-  width: calc(1.5em + 0.5rem + 2px);
-  min-width: calc(1.5em + 0.5rem + 2px);
-}
-
-.cc-button-group {
-  display: inline-flex;
-  vertical-align: middle;
-}
-
-.cc-button-group > .cc-button {
-  border-radius: 0;
-}
-
-.cc-button-group > .cc-button:first-child {
-  border-top-left-radius: var(--cc-radius-md);
-  border-bottom-left-radius: var(--cc-radius-md);
-}
-
-.cc-button-group > .cc-button:last-child {
-  border-top-right-radius: var(--cc-radius-md);
-  border-bottom-right-radius: var(--cc-radius-md);
-}
-
-.cc-button-group > .cc-button + .cc-button {
-  margin-left: -1px;
-}
-
 .list-row,
 .selected-row {
   display: flex;
@@ -368,14 +181,6 @@ h1 {
 }
 
 @media print {
-  .noprint {
-    display: none !important;
-  }
-
-  .printonly {
-    display: block !important;
-  }
-
   body.print-search-results {
     color: var(--cc-color-text);
     background: var(--cc-color-surface);

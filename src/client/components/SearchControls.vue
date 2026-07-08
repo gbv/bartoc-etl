@@ -8,7 +8,7 @@
       <select
         id="sort"
         v-model="selectedSort"
-        class="form-control form-select"
+        class="cc-form-control"
         @change="onChange">
         <option
           v-for="opt in options"

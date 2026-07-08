@@ -125,12 +125,6 @@ function printPage() {
   margin: 0;
 }
 
-.search-result-actions a.cc-button,
-.search-result-actions a.cc-button:hover,
-.search-result-actions a.cc-button:focus {
-  text-decoration: none;
-}
-
 @media print {
   .search-result-actions {
     display: block;

@@ -81,13 +81,29 @@ describe("SearchBar", () => {
       limit: "10",
     })
 
-    await wrapper.get("button").trigger("click")
+    await wrapper.get("form").trigger("submit")
 
     expect(wrapper.emitted("search")?.at(-1)).toEqual([
       {
         search: uri,
         field: "subject_uri",
         limit: "10",
+      },
+    ])
+  })
+
+  it("emits lookupUri when the search input contains an HTTP URI", async () => {
+    const uri = "http://uri.gbv.de/terminology/bk/42.90"
+    const { namespaces, wrapper } = await mountSearchBar()
+
+    await wrapper.get("input").setValue(uri)
+    await nextTick()
+
+    expect(namespaces.lookup).toHaveBeenCalledWith(uri)
+    expect(wrapper.emitted("lookupUri")?.at(-1)).toEqual([
+      {
+        uri,
+        name: `label for ${uri}`,
       },
     ])
   })

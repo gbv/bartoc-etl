@@ -99,19 +99,6 @@
   text-decoration: none;
 }
 
-.header__nav-right > a.header__add-button {
-  border-color: var(--cc-color-on-primary);
-  background: var(--cc-color-on-primary);
-  color: var(--cc-color-primary);
-}
-
-.header__nav-right > a.header__add-button:hover,
-.header__nav-right > a.header__add-button:focus-visible {
-  border-color: var(--cc-color-accent);
-  background: var(--cc-color-accent);
-  color: var(--cc-color-primary);
-}
-
 @media (max-width: 768px) {
   .header__container {
     flex-direction: column;

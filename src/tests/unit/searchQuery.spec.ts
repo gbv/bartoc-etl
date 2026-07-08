@@ -20,7 +20,6 @@ describe("buildSearchBarQuery", () => {
 
     expect(query).toEqual({
       filter: ["language:en"],
-      field: "",
       limit: "10",
       search: "dasdasas",
       sort: "relevance",
@@ -36,7 +35,35 @@ describe("buildSearchBarQuery", () => {
     )
 
     expect(query).toEqual({
-      field: "",
+      limit: "10",
+      search: "dasdasas",
+    })
+  })
+
+  it("includes the selected field when composing a new search", () => {
+    const query = buildSearchBarQuery(
+      { search: "classification" },
+      { search: "dasdasas", field: "title_search" },
+      [],
+      10,
+    )
+
+    expect(query).toEqual({
+      field: "title_search",
+      limit: "10",
+      search: "dasdasas",
+    })
+  })
+
+  it("removes stale field params when all fields are selected", () => {
+    const query = buildSearchBarQuery(
+      { field: "title_search", search: "classification" },
+      { search: "dasdasas" },
+      [],
+      10,
+    )
+
+    expect(query).toEqual({
       limit: "10",
       search: "dasdasas",
     })
