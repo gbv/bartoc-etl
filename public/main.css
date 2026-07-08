@@ -1,4 +1,5 @@
 /* Imports */
+@import '/vendor/bartoc-components/style.css';
 @import './header.css';
 @import './home.css';
 @import './search.css';

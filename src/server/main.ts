@@ -32,6 +32,13 @@ config.log?.(`Background workers are ${DEFAULT_WITH_WORKERS ? "Enabled" : "Disab
 
 const base = process.env.VIRTUAL_PATH || "/";
 const DATA_DIR = config.DATA_DIR;
+const BARTOC_COMPONENTS_STYLE_PATH = path.resolve(
+  "node_modules",
+  "@gbv",
+  "bartoc-components",
+  "dist",
+  "style.css",
+);
 
 // Cached production template
 const templateHtml = config.env === "production"
@@ -120,6 +127,10 @@ export async function createApp(opts?: {
 
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
+  app.get("/vendor/bartoc-components/style.css", (_req: Request, res: Response) => {
+    res.type("text/css");
+    res.sendFile(BARTOC_COMPONENTS_STYLE_PATH);
+  });
 
   // Initialize WebSocket support, not in tests for simplicity
   if (config.env !== "test") {

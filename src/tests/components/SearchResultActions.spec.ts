@@ -39,6 +39,21 @@ describe("SearchResultActions", () => {
     expect(wrapper.emitted("show-all")).toHaveLength(1)
   })
 
+  it("emits sort changes", async () => {
+    const wrapper = mountSearchResultActions()
+
+    await wrapper.get("select").setValue("created asc")
+
+    expect(wrapper.emitted("sort")).toEqual([[{ sort: "created", order: "asc" }]])
+  })
+
+  it("can hide sort controls", () => {
+    const wrapper = mountSearchResultActions({ showSort: false })
+
+    expect(wrapper.find("select").exists()).toBe(false)
+    expect(wrapper.text()).toContain("Showing 1 - 10 of 42 results")
+  })
+
   it("hides buttons from print output", () => {
     const wrapper = mountSearchResultActions()
 

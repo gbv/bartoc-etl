@@ -12,9 +12,7 @@ facets down * into SearchResults and SearchSidebar components. */
       @search="onSearch" />
     <SearchControls
       class="search-controls__area"
-      :model-value="sortKey"
       :lookup-uri="lookupUri"
-      @sort="onSort"
       @remove-badge="onRemoveFilter"
       @clear-filters="onClearFilters" />
     <div class="search-results__area">
@@ -24,7 +22,9 @@ facets down * into SearchResults and SearchSidebar components. */
           :summary="summary"
           :can-load-more="canLoadMore"
           :download-url="downloadUrl"
+          :sort-key="sortKey"
           @load-more="loadMore"
+          @sort="onSort"
           @show-all="showAll" />
         <SearchResults
           :results="results"
@@ -36,7 +36,10 @@ facets down * into SearchResults and SearchSidebar components. */
           :summary="summary"
           :can-load-more="canLoadMore"
           :download-url="downloadUrl"
+          :sort-key="sortKey"
+          :show-sort="false"
           @load-more="loadMore"
+          @sort="onSort"
           @show-all="showAll" />
       </template>
       <NoResults

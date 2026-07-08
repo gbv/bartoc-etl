@@ -2,45 +2,71 @@
   <nav
     aria-label="Search result actions"
     class="search-result-actions">
+    <div class="search-result-actions__toolbar">
+      <form
+        v-if="showSort"
+        class="search-result-actions__sort noprint"
+        @submit.prevent>
+        <label :for="sortSelectId">Sort by</label>
+        <select
+          :id="sortSelectId"
+          :value="sortKey"
+          class="cc-form-control search-result-actions__sort-select"
+          @change="onSortChange">
+          <option
+            v-for="opt in sortOptions"
+            :key="opt.key"
+            :value="opt.key">
+            {{ opt.label }}
+          </option>
+        </select>
+      </form>
+
+      <div class="action-group search-result-actions__buttons noprint">
+        <button
+          v-if="canLoadMore"
+          class="cc-button cc-button-primary search-result-actions__button"
+          type="button"
+          @click="emit('load-more')">
+          More
+        </button>
+        <button
+          v-if="canLoadMore"
+          class="cc-button cc-button-primary search-result-actions__button"
+          type="button"
+          @click="emit('show-all')">
+          All
+        </button>
+        <button
+          class="cc-button cc-button-primary search-result-actions__button search-result-actions__print"
+          type="button"
+          @click="printPage">
+          Print
+        </button>
+        <a
+          v-if="downloadUrl"
+          class="cc-button cc-button-primary search-result-actions__button"
+          :href="downloadUrl"
+          download="bartoc-search-results.jskos.json"
+          type="application/json">
+          Download
+        </a>
+      </div>
+    </div>
+
     <span class="search-result-actions__summary">
       {{ formattedSummary }}
     </span>
-
-    <div class="action-group search-result-actions__buttons noprint">
-      <button
-        v-if="canLoadMore"
-        class="cc-button cc-button-primary search-result-actions__button"
-        type="button"
-        @click="emit('load-more')">
-        More
-      </button>
-      <button
-        v-if="canLoadMore"
-        class="cc-button cc-button-primary search-result-actions__button"
-        type="button"
-        @click="emit('show-all')">
-        All
-      </button>
-      <button
-        class="cc-button cc-button-primary search-result-actions__button search-result-actions__print"
-        type="button"
-        @click="printPage">
-        Print
-      </button>
-      <a
-        v-if="downloadUrl"
-        class="cc-button cc-button-primary search-result-actions__button"
-        :href="downloadUrl"
-        download="bartoc-search-results.jskos.json"
-        type="application/json">
-        Download
-      </a>
-    </div>
   </nav>
 </template>
 
 <script setup>
-import { computed } from "vue"
+import { computed, useId } from "vue"
+import {
+  DEFAULT_SORT_KEY,
+  SORT_KEY_TO_SOLR,
+  SORT_OPTIONS,
+} from "../constants/sort.js"
 
 const props = defineProps({
   summary: {
@@ -62,9 +88,19 @@ const props = defineProps({
     type: String,
     default: "",
   },
+  sortKey: {
+    type: String,
+    default: DEFAULT_SORT_KEY,
+  },
+  showSort: {
+    type: Boolean,
+    default: true,
+  },
 })
 
-const emit = defineEmits([ "load-more", "show-all" ])
+const emit = defineEmits([ "load-more", "show-all", "sort" ])
+const sortOptions = SORT_OPTIONS
+const sortSelectId = `search-result-actions-sort-${useId()}`
 
 const formattedSummary = computed(() => {
   const { from, to, total } = props.summary
@@ -72,6 +108,13 @@ const formattedSummary = computed(() => {
 
   return `Showing ${formatNumber(from)} - ${formatNumber(to)} of ${formatNumber(total)} results`
 })
+
+function onSortChange(event) {
+  const key = event.target.value || DEFAULT_SORT_KEY
+  const sortValue = SORT_KEY_TO_SOLR[key] || SORT_KEY_TO_SOLR[DEFAULT_SORT_KEY]
+
+  emit("sort", { sort: sortValue.sort, order: sortValue.order })
+}
 
 function printPage() {
   if (typeof window === "undefined" || typeof window.print !== "function") {
@@ -102,13 +145,19 @@ function printPage() {
 <style scoped>
 .search-result-actions {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  flex-direction: column;
+  gap: 6px;
   width: 100%;
   max-width: 900px;
   margin: 0.75rem auto;
+}
+
+.search-result-actions__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .search-result-actions__summary {
@@ -117,8 +166,26 @@ function printPage() {
   color: var(--cc-color-muted);
 }
 
+.search-result-actions__sort {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.search-result-actions__sort label {
+  color: var(--cc-color-text);
+  font-size: 14px;
+}
+
+.search-result-actions__sort-select {
+  width: auto;
+  min-width: 12rem;
+}
+
 .search-result-actions__buttons {
   justify-content: flex-end;
+  margin-left: auto;
 }
 
 .search-result-actions__button {

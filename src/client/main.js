@@ -9,7 +9,6 @@ import { Login, UserStatus } from "gbv-login-client-vue"
 import { library } from "@fortawesome/fontawesome-svg-core"
 import { faChevronUp, faTimesCircle, faInfoCircle } from "@fortawesome/free-solid-svg-icons"
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome"
-import "@gbv/bartoc-components/style.css"
 
 // SSR requires a fresh app instance per request, therefore we export a function
 // that creates a fresh app instance. If using Vuex, we'd also be creating a
