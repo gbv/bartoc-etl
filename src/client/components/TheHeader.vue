@@ -1,62 +1,21 @@
 <template>
-  <header class="header">
-    <div class="app-container header__container noprint">
-      <div class="header__logo no-hover">
-        <a href="/">
-          <img
-            :src="logoUrl"
-            alt="BARTOC Search"
-            class="bartoc-logo__image header__logo-image">
-        </a>
-      </div>
-      <nav class="header__nav">
-        <div class="header__nav-left">
-          <a
-            class="header__nav-link"
-            href="/about">About</a>
-          <a
-            class="header__nav-link"
-            href="/vocabularies">Terminologies</a>
-          <a
-            class="header__nav-link"
-            href="/registries">Registries</a>
-          <a
-            class="header__nav-link"
-            href="/software">Software</a>
-          <a
-            class="header__nav-link"
-            href="/stats">Statistics</a>
-        </div>
-        <div class="header__nav-right">
-          <a
-            class="header__nav-link"
-            href="/contact">Contact & Editors</a>
-          <UserStatus redirect />
-          <a
-            v-if="userCanAdd"
-            class="cc-button cc-button-on-primary header__add-button"
-            :href="editUrl">
-            Add
-          </a>
-        </div>
-      </nav>
-    </div>
-    <div
-      class="print-header printonly"
-      aria-hidden="true">
-      <img
-        :src="printLogoUrl"
-        alt=""
-        class="print-header__logo">
-      <span class="print-header__text">
-        Basic Register of Thesauri, Ontologies & Classifications (BARTOC.org)
-      </span>
-    </div>
-  </header>
+  <BartocHeader
+    :logo-url="logoUrl"
+    logo-alt="BARTOC Search"
+    :nav-links="navLinks"
+    :utility-links="utilityLinks"
+    :user-can-add="userCanAdd"
+    :edit-url="editUrl"
+    :print-logo-url="printLogoUrl">
+    <template #user-status>
+      <UserStatus redirect />
+    </template>
+  </BartocHeader>
 </template>
 
 <script setup>
 import { inject, ref, watch } from "vue"
+import { BartocHeader } from "@gbv/bartoc-components"
 import logoUrl from "../assets/bartoc-logo.svg"
 import printLogoUrl from "../assets/bartoc-logo_for_print.svg"
 
@@ -64,6 +23,34 @@ const { token } = inject("login-refs")
 const userCanAdd = ref(false)
 const authBase = "https://bartoc.org"
 const editUrl = import.meta.env.DEV ? "https://dev.bartoc.org/edit" : "/edit"
+const navLinks = [
+  {
+    href: "/about",
+    label: "About",
+  },
+  {
+    href: "/vocabularies",
+    label: "Terminologies",
+  },
+  {
+    href: "/registries",
+    label: "Registries",
+  },
+  {
+    href: "/software",
+    label: "Software",
+  },
+  {
+    href: "/stats",
+    label: "Statistics",
+  },
+]
+const utilityLinks = [
+  {
+    href: "/contact",
+    label: "Contact & Editors",
+  },
+]
 
 watch(token, async currentToken => {
   if (!currentToken) {
@@ -86,6 +73,4 @@ watch(token, async currentToken => {
     userCanAdd.value = false
   }
 }, { immediate: true })
-
-
 </script>

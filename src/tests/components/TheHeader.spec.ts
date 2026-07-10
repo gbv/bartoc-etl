@@ -8,6 +8,7 @@ import TheHeader from "../../client/components/TheHeader.vue"
 const UserStatusStub = {
   template: "<div class=\"user-status-stub\" />",
 }
+const addButtonSelector = ".bartoc-header__nav-right .cc-button"
 
 function mountHeader(initialToken: string | null = null) {
   const token = ref(initialToken)
@@ -37,7 +38,7 @@ describe("TheHeader", () => {
 
     const { wrapper, token } = mountHeader()
 
-    expect(wrapper.find(".header__add-button").exists()).toBe(false)
+    expect(wrapper.find(addButtonSelector).exists()).toBe(false)
 
     token.value = "test-token"
     await flushPromises()
@@ -51,13 +52,13 @@ describe("TheHeader", () => {
       },
     )
 
-    expect(wrapper.get(".header__add-button").attributes("href"))
+    expect(wrapper.get(addButtonSelector).attributes("href"))
         .toBe("https://dev.bartoc.org/edit")
 
     token.value = null
     await flushPromises()
 
-    expect(wrapper.find(".header__add-button").exists()).toBe(false)
+    expect(wrapper.find(addButtonSelector).exists()).toBe(false)
   })
 
   it("keeps Add hidden when authorization fails", async () => {
@@ -66,7 +67,7 @@ describe("TheHeader", () => {
     const { wrapper } = mountHeader("test-token")
     await flushPromises()
 
-    expect(wrapper.find(".header__add-button").exists()).toBe(false)
+    expect(wrapper.find(addButtonSelector).exists()).toBe(false)
   })
 
   it("keeps Add hidden when authorization request fails", async () => {
@@ -78,6 +79,6 @@ describe("TheHeader", () => {
     const { wrapper } = mountHeader("test-token")
     await flushPromises()
 
-    expect(wrapper.find(".header__add-button").exists()).toBe(false)
+    expect(wrapper.find(addButtonSelector).exists()).toBe(false)
   })
 })

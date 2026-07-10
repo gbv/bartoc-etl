@@ -1,9 +1,22 @@
 /* Imports */
 @import './vendor/bartoc-components/style.css';
-@import './header.css';
 @import './home.css';
 @import './search.css';
 @import './search-controls.css';
+
+
+/* Temporary compatibility patch for gbv-login-client-vue */
+.bartoc-header__user-status > .user-status > a {
+  color: inherit;
+  font-size: var(--cc-font-size-base);
+  font-weight: var(--cc-font-weight-light);
+}
+
+.bartoc-header__user-status .user-status-dropdown {
+  color: var(--cc-color-text);
+  z-index: 1000;
+}
+
 
 /* Global reset */
 *,
@@ -185,33 +198,6 @@ h1 {
   body.print-search-results {
     color: var(--cc-color-text);
     background: var(--cc-color-surface);
-  }
-
-  .header {
-    position: static;
-    color: var(--cc-color-text);
-    background: var(--cc-color-surface);
-    box-shadow: none;
-  }
-
-  .print-header {
-    display: flex !important;
-    align-items: center;
-    gap: 0.5rem;
-    margin: 0 0 0.6rem;
-    padding: 0 0 0.35rem;
-  }
-
-  .print-header__logo {
-    display: block;
-    width: auto;
-    height: 36px;
-  }
-
-  .print-header__text {
-    font-size: 16px;
-    font-weight: 700;
-    line-height: 1.2;
   }
 
   body.print-search-results #app {
