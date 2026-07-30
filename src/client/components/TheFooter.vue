@@ -1,8 +1,7 @@
 <template>
   <BartocFooter
     site-name="BARTOC.org"
-    api-url="/api/"
-    download-url="/download"
+    :internal-links="internalLinks"
     :external-links="externalLinks"
     :search-status-links="searchStatusLinks">
     <template #search-status>
@@ -42,19 +41,17 @@ const searchStatusLinks = [
 ]
 
 const externalLinks = [
-  {
-    href: "https://code4lib.social/@bartoc",
-    label: "Mastodon",
-    rel: "me",
-  },
-  {
-    href: "https://github.com/gbv/bartoc.org",
-    label: "sources",
-  },
-  {
-    href: "https://github.com/gbv/bartoc.org/issues",
-    label: "issues",
-  },
+  { label: "Imprint", href: "https://www.gbv.de/impressum" },
+  { label: "Privacy Policy", href: "https://www.gbv.de/datenschutz" },
+  { label: "Mastodon", href: "https://code4lib.social/@bartoc", rel: "me" },
+  { label: "sources", href: "https://github.com/gbv/bartoc.org" },
+  { label: "issues", href: "https://github.com/gbv/bartoc.org/issues" },
+]
+
+const internalLinks = [
+  { href: "/api/", label: "API" },
+  { href: "/download", label: "download" },
+  { href: "/sparql", label: "SPARQL" },
 ]
 
 onMounted(async () => {
